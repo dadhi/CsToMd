@@ -21,10 +21,10 @@ which generates a markdown file from the .cs file by stripping the comments `/*m
 
 - Clone this repo, compile *CsToMd* project, find the *CsToMd.vsix* in output and install it.   
 __Or simply install__ a `vsix` extension from the [release](https://github.com/dadhi/CsToMd/releases/tag/1.0.0-preview-01).
-- In properties of you .cs file set the property `CustomTool` to `CsToMd`. 
-- Save the .cs file with `/*md` and `md*/` commnents in it. 
+- In properties of your .cs file, set the `CustomTool` property to `CsToMd`.
+- Save the .cs file with `/*md` and `md*/` commnents in it (or without - it will work too). 
 - Check the generated .md file under the .cs file in Solution Explorer
 
-Play with the example project *CsToMdTest* in this repo to see how it works.
+Play with the example project [CsToMdTest](https://github.com/dadhi/CsToMd/tree/1.0.0-preview-01/CsToMdTest) in this repo to see how it works.
 
 **That's all for now.. Stay tuned ;-)**
