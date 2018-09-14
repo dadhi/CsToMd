@@ -8,7 +8,7 @@
         <License>LICENSE.txt</License>
         <Icon>Resources\RemoveMdComments.ico</Icon>
         <PreviewImage>screen1.png</PreviewImage>
-        <Tags>CSharp Markdown md FileGenerator TemplateGenerator LiterateProgramming Documentation RunnableSamples</Tags>
+        <Tags>CSharp;Markdown;md;FileGenerator;TemplateGenerator;LiterateProgramming;Documentation;LiveDocumentation;RunnableSamples</Tags>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0, 16.0)" />
