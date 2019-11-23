@@ -4,11 +4,12 @@
 
 *Because it is.*
 
-Here is the proof:
+Here is the proof __below__
 
 ```cs 
 public class Class1
 {
+    public void Blah() { }
 }
 ```
 

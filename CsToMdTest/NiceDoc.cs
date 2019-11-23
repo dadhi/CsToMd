@@ -5,11 +5,12 @@
 
 *Because it is.*
 
-Here is the proof:
+Here is the proof __below__
 
 ```cs md*/
 public class Class1
 {
+    public void Blah() { }
 }
 /*md
 ```
