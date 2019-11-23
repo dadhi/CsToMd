@@ -1,0 +1,6 @@
+﻿# Release Notes
+
+## V1.1.0
+
+Added support for Visual Studio 2019 (v16)
+
