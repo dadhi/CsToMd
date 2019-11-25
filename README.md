@@ -2,7 +2,7 @@
 
 Visual Studio extension to generate a Markdown .md documentation file from the C# .cs file stripping the special symbol comments.
 
-This VSIX extension for Visual Studio 2017 contains a CustomTool File Generator, 
+This VSIX extension for Visual Studio 2019 contains a CustomTool File Generator, 
 which generates a markdown file from the .cs file by stripping the comments `/*md` and `md*/`.
 
 **The tool helps to turn your C# file with markdown comments into documentation file with runnable examples and what not.**
