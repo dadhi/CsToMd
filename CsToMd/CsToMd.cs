@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.VisualStudio;
@@ -64,27 +63,8 @@ namespace CsToMd
             try
             {
                 var inputLines = bstrInputFileContents.Split(new[] { NewLine }, StringSplitOptions.None);
-
-                var outputBuilder = new StringBuilder(inputLines.Length * 20);
-                var lastLineIndex = inputLines.Length - 1;
-                for (var i = 0; i < inputLines.Length; i++)
-                {
-                    var line = inputLines[i];
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                        var parts = line.Split(StripSymbols, StringSplitOptions.None);
-                        if (parts.Length != 1)
-                            line = parts.Any(s => !string.IsNullOrWhiteSpace(s)) ? string.Concat(parts) : null;
-                    }
-
-                    if (line != null)
-                    {
-                        if (i < lastLineIndex)
-                            outputBuilder.AppendLine(line);
-                        else
-                            outputBuilder.Append(line);
-                    }
-                }
+                
+                var outputBuilder = CommentStripper.StripMdComments(inputLines);
 
                 var output = outputBuilder.ToString();
                 var outputBytes = Encoding.UTF8.GetBytes(output);

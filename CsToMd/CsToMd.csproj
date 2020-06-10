@@ -57,6 +57,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CodeGeneratorRegistrationAttribute.cs" />
+    <Compile Include="CommentStripper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CsToMd.cs" />
   </ItemGroup>
