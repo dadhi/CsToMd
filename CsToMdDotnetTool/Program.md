@@ -7,9 +7,9 @@
 
 Because it is
 
-- Sick 
-    * Cool
-        + [Awesome](#end-of-the-document)
+- still a valid C# `code` file,
+    * a nice markdown documentation,
+        + and [all around awesome!](#end-of-the-document)
 
 </details>
 
@@ -44,7 +44,7 @@ namespace CsToMdDotnetTool
             }
 
             if (args.Length != 1)
-                throw new ArgumentException($"error: {_expectedArgs}, but instead got the '{args.Length}' number of arguments");
+                throw new ArgumentException($"error: {_expectedArgs}, but instead got the {args.Length} arguments");
 
             var csFilePath = args[0];
             var ext = Path.GetExtension(csFilePath);
