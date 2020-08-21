@@ -47,10 +47,6 @@ namespace CsToMdDotnetTool
                 throw new ArgumentException($"error: {_expectedArgs}, but instead got the {args.Length} arguments");
 
             var csFilePath = args[0];
-            var ext = Path.GetExtension(csFilePath);
-            if (!".cs".Equals(ext, StringComparison.InvariantCultureIgnoreCase))
-                throw new ArgumentException($"error: {_expectedArgs}, but instead got the file '{csFilePath}' with different extension '{ext}'");
-
             if (!File.Exists(csFilePath))
                 throw new ArgumentException($"error: {_expectedArgs}, but instead got non existing file '{csFilePath}'");
 

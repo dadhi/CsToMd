@@ -8,7 +8,7 @@
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
         <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix>preview-01</VersionSuffix>
+        <VersionSuffix>preview-02</VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Maksim Volkau</Authors>
