@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>Latest</LangVersion>
+        <OutputType>Exe</OutputType>
+        <PackAsTool>True</PackAsTool>
+        <ToolCommandName>cstomd</ToolCommandName>
+        <AssemblyName>cstomd</AssemblyName>
+        <PackageId>dotnet-cstomd</PackageId>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <VersionSuffix>preview-01</VersionSuffix>
+        <PackageOutputPath>..\.nupkg</PackageOutputPath>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Maksim Volkau</Authors>
+        <Copyright>Copyright © 2018-2020 Maksim Volkau</Copyright>
+        <PackageProjectUrl>https://github.com/dadhi/cstomd</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/dadhi/cstomd</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicense>https://github.com/dadhi/cstomd/blob/master/LICENSE</PackageLicense>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>Dotnet CLI Tool for converting the C# test file to Markdown documentation file</Description>
+        <PackageTags>cli dotnet dotnet-tool csharp tests markdown documentation live-documentation literate-programming</PackageTags>
+        <PackageReleaseNotes>
+            <![CDATA[
+## v1.0.0
+
+Initial version
+
+
+]]>
+        </PackageReleaseNotes>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="..\LICENSE" Pack="True" PackagePath="." Visible="false" />
+    </ItemGroup>
+</Project>
