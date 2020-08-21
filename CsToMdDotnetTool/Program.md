@@ -1,4 +1,3 @@
-﻿/*md
 # Dotnet CLI Tool to convert from .cs to .md
 
 > Hmm why? :smirk:
@@ -8,26 +7,25 @@
 
 Because it is
 
-- Sick
+- Sick 
     * Cool
-        + and [Awesome](#end-of-the-document)
+        + [Awesome](#end-of-the-document)
 
 </details>
 
 <details>
 <summary><code>using (...)</code></summary>
 
-```cs md*/
+```cs 
 using System;
 using System.IO;
 using CsToMd;
 using static System.Console;
-/*md
 ```
 
 </details>
 
-```cs md*/
+```cs 
 namespace CsToMdDotnetTool
 {
     class Program
@@ -66,11 +64,9 @@ namespace CsToMdDotnetTool
         }
     }
 }
-/*md
 ```
 
 ## End of the document
 
  ~~hand waving~~ :heart:
 
-md*/

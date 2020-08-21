@@ -21,11 +21,6 @@ namespace CsToMd
         public const string PackageGuid = "5a4dc0a7-5ae0-42a4-8d38-326644b59f10";
         public const string ContextGuidEmbraced = "{FAE04EC1-301F-11D3-BF4B-00C04F79EFBC}";
 
-        /// <summary>
-        /// If line contains these symbols only it will be removed from out put, otherwise it the symbols will be stripped from line.
-        /// </summary>
-        public static readonly string[] StripSymbols = { @"/*md", @"md*/" };
-
         /// <summary>Retrieves the file extension that is given to the output file name.</summary>
         /// <returns>If the method succeeds, it returns <see cref="F:Microsoft.VisualStudio.VSConstants.S_OK" />. If it fails, it returns an error code.</returns>
         /// <param name="pbstrDefaultExtension">[out, retval] Returns the file extension that is to be given to the output file name.

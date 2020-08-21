@@ -32,6 +32,7 @@ Initial version
         </PackageReleaseNotes>
     </PropertyGroup>
     <ItemGroup>
+        <Compile Include="..\CsToMd\CommentStripper.cs" />
         <None Include="..\LICENSE" Pack="True" PackagePath="." Visible="false" />
     </ItemGroup>
 </Project>
