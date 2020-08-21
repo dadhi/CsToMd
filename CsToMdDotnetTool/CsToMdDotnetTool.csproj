@@ -27,6 +27,7 @@
 
 Initial version
 
+- Converting (copying) a single file to a with any extension (preview-02 removes .cs restriction)
 
 ]]>
         </PackageReleaseNotes>
