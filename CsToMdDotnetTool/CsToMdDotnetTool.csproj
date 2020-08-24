@@ -8,7 +8,7 @@
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
         <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix>preview-03</VersionSuffix>
+        <VersionSuffix>preview-04</VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Maksim Volkau</Authors>
@@ -27,7 +27,8 @@
 
 Initial version
 
-- Converting (copying) a single file with any extension (preview-02 removes .cs restriction)
+- Converting (copying) a single file with any extension
+- Support for the optional configuration file to remove the lines started with the lines in the config file
 
 ]]>
         </PackageReleaseNotes>
