@@ -3,23 +3,25 @@
 
 > Hmm why? :smirk:
 
-<details>
-<summary><strong>Click to expand for the reason</strong></summary>
-
+//md{
 Because it is
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
+//md}
 
-</details>
-
-```cs md*/
+md*/
+//md{ usings ...
+//md```cs
 using System;
 using System.IO;
 using CsToMd;
 using static System.Console;
+//md```
+//md}
 
+//md```cs
 class Program
 {
     const string _expectedArgs = @"The tool expects the first argument to be the path to the `.cs` file,

@@ -2,19 +2,26 @@
 
 > Hmm why? :smirk:
 
-<details>
-<summary><strong>Click to expand for the reason</strong></summary>
+<details><summary><strong></strong></summary>
 
 Because it is
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
-
 </details>
 
-```cs 
+<details><summary><strong>usings ...</strong></summary>
 
+```cs
+using System;
+using System.IO;
+using CsToMd;
+using static System.Console;
+```
+</details>
+
+```cs
 class Program
 {
     const string _expectedArgs = @"The tool expects the first argument to be the path to the `.cs` file,
