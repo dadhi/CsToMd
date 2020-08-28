@@ -3,7 +3,7 @@
 Visual Studio extension to generate a Markdown .md documentation file from the C# .cs file stripping the special symbol comments.
 
 This VSIX extension for Visual Studio 2019 contains a CustomTool File Generator, 
-which generates a markdown file from the .cs file by stripping the comments `/*md` and `md*/`.
+which generates a markdown file from the .cs file by stripping the comments `/*md`, `md*/`, and `//md`.
 
 **The tool helps to turn your C# file with markdown comments into documentation file with runnable examples and what not.**
 
@@ -22,7 +22,7 @@ which generates a markdown file from the .cs file by stripping the comments `/*m
 - Clone this repo, compile *CsToMd* project, find the *CsToMd.vsix* in output and install it.   
 __Or simply install__ a `vsix` extension from the [release](https://github.com/dadhi/CsToMd/releases/tag/1.0.0-preview-01).
 - In properties of your .cs file, set the `CustomTool` property to `CsToMd`.
-- Save the .cs file with `/*md` and `md*/` commnents in it (or without - it will work too). 
+- Save the .cs file with `/*md` and `md*/` comments in it (or without - it will work too). 
 - Check the generated .md file under the .cs file in Solution Explorer
 
 Play with the example project [CsToMdTest](https://github.com/dadhi/CsToMd/tree/1.0.0-preview-01/CsToMdTest) in this repo to see how it works.
