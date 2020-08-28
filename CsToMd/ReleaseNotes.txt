@@ -1,6 +1,8 @@
 ﻿# Release Notes
 
-## V1.1.1
+## v1.2.0 - Feature release
 
-Added support for Visual Studio 2019 (v16)
-
+- added: #3 Make it to dotnet CLI tool (dotnet-cstomd)
+- added: #4 Ability to remove specific lines from the md output #4
+- added: #6 Add the special comments to wrap the section into collapsible details enhancement
+- added: #7 Strip the comment from the line with `//md` enhancement

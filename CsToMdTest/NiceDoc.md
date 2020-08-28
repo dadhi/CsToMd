@@ -2,15 +2,21 @@
 
 > Hmm, why?
 
-*Because it is.*
+*Why not* and here is the proof
+<details><summary><strong>collapsible section with using(s) ...</strong></summary>
 
-Here is the proof __below__
+```
+using System;
+using System.Text;
+```
+</details>
 
-```cs 
-public class Class1
+
+```cs
+public class Foo
 {
-    public void Blah() { }
+    public void Bar() { }
 }
 ```
-
-End of nice document.
+ ~~stripped comment~~
+End of the nice document.

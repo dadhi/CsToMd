@@ -3,17 +3,24 @@
 
 > Hmm, why?
 
-*Because it is.*
+*Why not* and here is the proof
+md*/
+//md{ collapsible section with using(s) ...
+//md```
+using System;
+using System.Text;
+//md```
+//md}
 
-Here is the proof __below__
+//- removed comment
 
-```cs md*/
-public class Class1
+//md```cs
+public class Foo
 {
-    public void Blah() { }
+    public void Bar() { }
 }
 /*md
 ```
-
-End of nice document.
+//md ~~stripped comment~~
+End of the nice document.
 md*/
