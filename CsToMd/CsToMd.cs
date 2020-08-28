@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.IO;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -18,6 +19,8 @@ namespace CsToMd
     [CodeGeneratorRegistration(typeof(CsToMd), nameof(CsToMd), ContextGuidEmbraced, GeneratesDesignTimeSource = true)]
     public sealed class CsToMd : IVsSingleFileGenerator
     {
+        const string _defaultConfigFileName = "cstomd.config";
+
         public const string PackageGuid = "5a4dc0a7-5ae0-42a4-8d38-326644b59f10";
         public const string ContextGuidEmbraced = "{FAE04EC1-301F-11D3-BF4B-00C04F79EFBC}";
 
@@ -58,8 +61,12 @@ namespace CsToMd
             try
             {
                 var inputLines = bstrInputFileContents.Split(new[] { NewLine }, StringSplitOptions.None);
-                
-                var outputBuilder = CommentStripper.StripMdComments(inputLines);
+
+                string[] removeLineStartingWith = null;
+                if (File.Exists(_defaultConfigFileName))
+                    removeLineStartingWith = File.ReadAllLines(_defaultConfigFileName);
+
+                var outputBuilder = CommentStripper.StripMdComments(inputLines, removeLineStartingWith);
 
                 var output = outputBuilder.ToString();
                 var outputBytes = Encoding.UTF8.GetBytes(output);

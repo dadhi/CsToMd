@@ -51,7 +51,7 @@ The config file should contain the starting lines to exclude from the generated 
         var inputFilePath = args[0];
         if (!File.Exists(inputFilePath))
             throw new ArgumentException($"error: {_expectedArgs} But instead got nonexisting input file '{inputFilePath}'");
-        
+
         string[] removeLineStartingWith = null;
         if (args.Length == 2)
         {
