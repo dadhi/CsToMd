@@ -7,7 +7,7 @@
         <ToolCommandName>cstomd</ToolCommandName>
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
-        <VersionPrefix>1.2.0</VersionPrefix>
+        <VersionPrefix>1.2.1</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -23,6 +23,10 @@
         <PackageTags>cli dotnet dotnet-tool csharp tests markdown documentation live-documentation literate-programming</PackageTags>
         <PackageReleaseNotes>
             <![CDATA[
+            
+## v1.2.1 - Bug-fix release
+
+- added: Adding the new line after the collapsible section otherwise it breaks the markdown
 
 ## v1.2.0 - Feature release
 

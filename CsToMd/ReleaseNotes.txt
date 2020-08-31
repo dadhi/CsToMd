@@ -1,5 +1,9 @@
 ﻿# Release Notes
 
+## v1.2.1 - Bug-fix release
+
+- added: Adding the new line after the collapsible section otherwise it breaks the markdown
+
 ## v1.2.0 - Feature release
 
 - added: #3 Make it to dotnet CLI tool (dotnet-cstomd)

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="CsToMd.13e98d61-1f50-4acd-8e25-099cf4b733f3" Version="1.2.0" Language="en-US" Publisher="dadhi" />
+        <Identity Id="CsToMd.13e98d61-1f50-4acd-8e25-099cf4b733f3" Version="1.2.1" Language="en-US" Publisher="dadhi" />
         <DisplayName>CsToMd</DisplayName>
         <Description xml:space="preserve">Generates a Markdown .md file from the input C# .cs file removing the `/*md` and `md*/` comment lines</Description>
         <MoreInfo>https://github.com/dadhi/Cstomd</MoreInfo>
