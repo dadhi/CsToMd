@@ -15,7 +15,7 @@ namespace CsToMd
         public static readonly string CollapsibleSectionCommentBegin = "//md{";
         public static readonly string CollapsibleSectionCommentEnd   = "//md}";
         public static readonly string CollapsibleSectionMarkdownBegin = @"<details><summary><strong>{0}</strong></summary>" + NewLine;
-        public static readonly string CollapsibleSectionMarkdownEnd   = @"</details>";
+        public static readonly string CollapsibleSectionMarkdownEnd   = @"</details>" + NewLine;
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
