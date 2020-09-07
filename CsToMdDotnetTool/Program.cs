@@ -27,7 +27,7 @@ class Program
     const string _expectedArgs = @"The tool expects the first argument to be the path to the `.cs` file,
 
 and the optional second argument to be the path to the config file (the default is './cstomd.config')
-The config file should contain the starting lines to exclude from the generated outout.
+The config file should contain the starting lines to exclude from the generated output.
 
 ";
 
