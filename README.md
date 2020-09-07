@@ -1,6 +1,6 @@
 # CsToMd
 
-[![NuGet Badge](https://buildstats.info/nuget/CsToMd)](https://www.nuget.org/packages/dotnet-cstomd)
+[![NuGet Badge](https://buildstats.info/nuget/dotnet-cstomd)](https://www.nuget.org/packages/dotnet-cstomd)
 
 ## Overview
 
