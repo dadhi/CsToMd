@@ -2,9 +2,8 @@
 
 > Hmm why? :smirk:
 
-<details><summary><strong></strong></summary>
+<details><summary><strong>Just click me</strong></summary>
 
-Because it is
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
