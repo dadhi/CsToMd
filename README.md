@@ -1,30 +1,84 @@
-## CsToMd
+# CsToMd
 
-Visual Studio extension to generate a Markdown .md documentation file from the C# .cs file stripping the special symbol comments.
+[![NuGet Badge](https://buildstats.info/nuget/CsToMd)](https://www.nuget.org/packages/dotnet-cstomd)
 
-This VSIX extension for Visual Studio 2019 contains a CustomTool File Generator, 
-which generates a markdown file from the .cs file by stripping the comments `/*md`, `md*/`, and `//md`.
+## Overview
 
-**The tool helps to turn your C# file with markdown comments into documentation file with runnable examples and what not.**
+The [dotnet CLI tool](https://www.nuget.org/packages/dotnet-cstomd) and [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) to generate the [Markdown](https://guides.github.com/features/mastering-markdown) documentation file from the C# file.
 
-### How it looks
+**The idea** is to have a normal C# .cs file with the special comments `/*md`, `md*/`, and `//md` which will be stripped when converting the file into the respective Markdown .md file. There are couple of additional features but this is basically it. 
+
+Now you may have **the documentation always up-to-date and contain a runnable samples** in the normal .NET Test library project with NUnit, XUnit, etc.
+
+You may check the DryIoc [documentation project](https://github.com/dadhi/DryIoc/tree/master/docs/DryIoc.Docs) for the reald-world example.
+
+The additional features in v1.2.0:
+
+- Converting the section outlined with `//md{` and `//md}` comments int the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab)
+- The optional `cstomd.config` file in the folder with the lines starters to be removed completely from the generated documentation file.
+
+
+## Visual Studio extension
+
+This extension for Visual Studio 2019+ contains a CustomTool File Generator.
+
+When applied to the C# source file it looks like this:
 
 ![screen1](screen1.png)
 
 
-### The result
+The generated result:
 
 ![screen1](screen2.png)
 
 
 ### How to use
 
-- Clone this repo, compile *CsToMd* project, find the *CsToMd.vsix* in output and install it.   
-__Or simply install__ a `vsix` extension from the [release](https://github.com/dadhi/CsToMd/releases/tag/1.0.0-preview-01).
-- In properties of your .cs file, set the `CustomTool` property to `CsToMd`.
-- Save the .cs file with `/*md` and `md*/` comments in it (or without - it will work too). 
+- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the markerplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases).
+- In properties of your .cs file set the `CustomTool` property to `CsToMd`.
+- Save the .cs file
 - Check the generated .md file under the .cs file in Solution Explorer
 
-Play with the example project [CsToMdTest](https://github.com/dadhi/CsToMd/tree/1.0.0-preview-01/CsToMdTest) in this repo to see how it works.
 
-**That's all for now.. Stay tuned ;-)**
+## Dotnet CLI tool
+
+The [dotnet-cstomd](https://www.nuget.org/packages/dotnet-cstomd) is a [dotnet CLI tool](https://docs.microsoft.com/en-us/dotnet/core/tools/) providing the same functionality as a Visual Studio extension plus it may be called from the command line and from the MSBuild scripts (**enabling the document generation in the build pipeline**).
+
+I addition the dotnet tool enables the documentation development in the **Visual Studio Code**.
+
+### How to use
+
+For ad-hoc document generation:
+
+- Install the dotnet-cstomd globally from the nuget, e.g. in the shell of your choice `dotnet tool install --global dotnet-cstomd --version 1.2.1`. Now you can invoke `cstomd MyClass.cs` directly and get a `MyClass.md` output.
+
+Build integration:
+
+- [Install the tool locally for you project](https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use#:~:text=Create%20a%20manifest%20file,-To%20install%20a&text=The%20output%20indicates%20successful%20creation%20of%20the%20file.&text=The%20template%20%22Dotnet%20local%20tool%20manifest%20file%22%20was%20created%20successfully.&text=The%20tools%20listed%20in%20a,the%20one%20that%20contains%20the%20.)
+
+  * Go to your project: `cd path\to\MyProject`
+  * Add the tool manifest file: `dotnet new tool-manifest`
+  * Install the tool: `dotnet tool install --global dotnet-cstomd --version 1.2.1`
+  * Add the section to you project:
+
+    ```xml
+    <ItemGroup>
+        <DocFile Include="**\*.cs" />
+    </ItemGroup>
+
+    <Target Name="MdGenerate" BeforeTargets="BeforeBuild"
+        Condition=" '$(Configuration)' == 'Debug' ">
+        <Message Text="Generating the Markdown documentation..." Importance="high"/>
+        <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet cstomd %(DocFile.Identity)" />
+    </Target>
+    ```
+    You may check the DryIoc [documentation project file](https://github.com/dadhi/DryIoc/blob/6f466ee1b4fde548c7211ecb0a54655011f69e57/docs/DryIoc.Docs/DryIoc.Docs.csproj#L26) for the real-world example.
+
+  * You may run the document generation target without the rest the build:
+   ```
+    dotnet msbuild -target:MdGenerate path\to\MyProject\MyProject.csproj
+   ```
+   You may create a helper `build_the_docs` file and store the command there.
+
+ 
+
