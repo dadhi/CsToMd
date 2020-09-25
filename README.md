@@ -66,8 +66,8 @@ I addition the dotnet tool enables the documentation development in the **Visual
 
   * Switch to your project: `cd path\to\MyProject`
   * Add the tool manifest file: `dotnet new tool-manifest`
-  * Install the tool: `dotnet tool install --global dotnet-cstomd --version 1.2.1` (the manifest file will be updated and later used for restore)
-  * Add the section to you project:
+  * Install the tool: `dotnet tool install dotnet-cstomd --version 1.2.1` (the manifest file will be updated and later used for restore)
+  * Add the section to your project:
 
     ```xml
     <ItemGroup>
