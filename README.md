@@ -80,11 +80,11 @@ I addition the dotnet tool enables the documentation development in the **Visual
     ```
     You may check the DryIoc [documentation project file](https://github.com/dadhi/DryIoc/blob/6f466ee1b4fde548c7211ecb0a54655011f69e57/docs/DryIoc.Docs/DryIoc.Docs.csproj#L26) for the real-world case example.
 
-  * You may run the document generation target without the rest the build:
+  * You may run the document generation target without the rest of the build:
    ```
     dotnet msbuild -target:MdGenerate path\to\MyProject\MyProject.csproj
    ```
-   You may create a helper `build_the_docs` file and store the command there.
+   You may create a helper shell script `build_the_docs` with the command above.
 
   
   Here is the [MS tutorial](https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use#:~:text=Create%20a%20manifest%20file,-To%20install%20a&text=The%20output%20indicates%20successful%20creation%20of%20the%20file.&text=The%20template%20%22Dotnet%20local%20tool%20manifest%20file%22%20was%20created%20successfully.&text=The%20tools%20listed%20in%20a,the%20one%20that%20contains%20the%20.) for installing and using the local tools.
