@@ -1,10 +1,15 @@
 ﻿/*md
 # Dotnet CLI Tool to convert from .cs to .md
 
-> Hmm why? :smirk:
 
-//md{
-Because it is
+- [Dotnet CLI Tool to convert from .cs to .md](#dotnet-cli-tool-to-convert-from-cs-to-md)
+  - [Why?](#why)
+  - [The end](#the-end)
+
+
+## Why?
+
+//md{ Because !
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
@@ -75,7 +80,7 @@ The config file should contain the starting lines to exclude from the generated 
 /*md
 ```
 
-## End of the document
+## The end
 
  ~~hand waving~~ :heart:
 

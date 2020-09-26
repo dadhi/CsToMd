@@ -1,14 +1,21 @@
 # Dotnet CLI Tool to convert from .cs to .md
 
-> Hmm why? :smirk:
 
-<details><summary><strong>Just click me</strong></summary>
+- [Dotnet CLI Tool to convert from .cs to .md](#dotnet-cli-tool-to-convert-from-cs-to-md)
+  - [Why?](#why)
+  - [The end](#the-end)
+
+
+## Why?
+
+<details><summary><strong>Because !</strong></summary>
 
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
 </details>
+
 
 <details><summary><strong>usings ...</strong></summary>
 
@@ -20,13 +27,14 @@ using static System.Console;
 ```
 </details>
 
+
 ```cs
 class Program
 {
     const string _expectedArgs = @"The tool expects the first argument to be the path to the `.cs` file,
 
 and the optional second argument to be the path to the config file (the default is './cstomd.config')
-The config file should contain the starting lines to exclude from the generated outout.
+The config file should contain the starting lines to exclude from the generated output.
 
 ";
 
@@ -73,7 +81,7 @@ The config file should contain the starting lines to exclude from the generated 
 }
 ```
 
-## End of the document
+## The end
 
  ~~hand waving~~ :heart:
 
