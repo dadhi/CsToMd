@@ -52,7 +52,7 @@ The generated result:
 
 The [dotnet-cstomd](https://www.nuget.org/packages/dotnet-cstomd) is a [dotnet CLI tool](https://docs.microsoft.com/en-us/dotnet/core/tools/) providing the same functionality as a Visual Studio extension plus it may be called from the command line and from the MSBuild **enabling the document generation in the build pipeline**.
 
-I addition the dotnet tool enables the documentation development in the **Visual Studio Code**.
+In addition the dotnet tool enables the documentation development in the **Visual Studio Code**.
 
 
 ![VSCode usage](screen3.png)
