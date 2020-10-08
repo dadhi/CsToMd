@@ -84,7 +84,7 @@ In addition the dotnet tool enables the documentation development in the **Visua
    ```
     dotnet msbuild -target:MdGenerate path\to\MyProject\MyProject.csproj
    ```
-   You may create a helper shell script `build_the_docs` with the command above.
+   You may create a helper shell script with the command above.
 
   
   Here is the [MS tutorial](https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use#:~:text=Create%20a%20manifest%20file,-To%20install%20a&text=The%20output%20indicates%20successful%20creation%20of%20the%20file.&text=The%20template%20%22Dotnet%20local%20tool%20manifest%20file%22%20was%20created%20successfully.&text=The%20tools%20listed%20in%20a,the%20one%20that%20contains%20the%20.) for installing and using the local tools.
