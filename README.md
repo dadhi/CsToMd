@@ -22,7 +22,7 @@ You may check the DryIoc [documentation project](https://github.com/dadhi/DryIoc
 
 The additional features in v1.2.0:
 
-- Converting the section outlined with `//md{` and `//md}` comments int the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab).
+- Converting the section outlined with `//md{` and `//md}` comments into the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab).
 - The optional `cstomd.config` file in the folder with the lines starters to be removed completely from the generated documentation file.
 
 
