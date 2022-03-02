@@ -1,16 +1,10 @@
 # CsToMd
 
-- [CsToMd](#cstomd)
-  - [Overview](#overview)
-  - [Visual Studio extension](#visual-studio-extension)
-    - [How to use](#how-to-use)
-  - [Dotnet CLI tool](#dotnet-cli-tool)
-    - [Ad-hoc document generation](#ad-hoc-document-generation)
-    - [Build integration](#build-integration)
-
-## Overview
+![stand with Ukraine](https://badgen.net/badge/stand%20with/UKRAINE/?color=0057B8&labelColor=FFD700)
 
 [![NuGet Badge](https://buildstats.info/nuget/dotnet-cstomd)](https://www.nuget.org/packages/dotnet-cstomd)
+
+## Overview
 
 The [dotnet CLI tool](https://www.nuget.org/packages/dotnet-cstomd) and [Visual Studio extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) to generate the [Markdown](https://guides.github.com/features/mastering-markdown) documentation file from the C# file.
 
