@@ -1,7 +1,5 @@
 # CsToMd
 
-![stand with Ukraine](https://badgen.net/badge/stand%20with/UKRAINE/?color=0057B8&labelColor=FFD700)
-
 [![NuGet Badge](https://buildstats.info/nuget/dotnet-cstomd)](https://www.nuget.org/packages/dotnet-cstomd)
 
 ## Overview
