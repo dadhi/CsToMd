@@ -1,32 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <LangVersion>Latest</LangVersion>
         <OutputType>Exe</OutputType>
         <PackAsTool>True</PackAsTool>
         <ToolCommandName>cstomd</ToolCommandName>
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
-        <VersionPrefix>1.2.1</VersionPrefix>
+        <VersionPrefix>2.0.1</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Maksim Volkau</Authors>
-        <Copyright>Copyright © 2018-2020 Maksim Volkau</Copyright>
+        <Copyright>Copyright © 2018-2024 Maksim Volkau</Copyright>
         <PackageProjectUrl>https://github.com/dadhi/cstomd</PackageProjectUrl>
         <RepositoryUrl>https://github.com/dadhi/cstomd</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicense>https://github.com/dadhi/cstomd/blob/master/LICENSE</PackageLicense>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Description>Dotnet CLI Tool for converting the C# test file to Markdown documentation file</Description>
+        <Description>Dotnet CLI Tool for converting the C# file with the normal Unit Tests to the Markdown documentation file</Description>
         <PackageTags>cli dotnet dotnet-tool csharp tests markdown documentation live-documentation literate-programming</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageReleaseNotes>
             <![CDATA[
             
+## v2.0.0 - Major release
+
+- breaking: Updated to run in .NET 6.0 instead of .NET Core 3.1
+- adding: readme.md file to the package
+
+
 ## v1.2.1 - Bug-fix release
 
 - added: Adding the new line after the collapsible section otherwise it breaks the markdown
+
 
 ## v1.2.0 - Feature release
 
@@ -40,6 +48,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="..\CsToMd\CommentStripper.cs" />
-        <None Include="..\LICENSE" Pack="True" PackagePath="." Visible="false" />
+        <None Include="..\LICENSE" Pack="True" PackagePath="\" Visible="false" />
+        <None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
     </ItemGroup>
 </Project>
