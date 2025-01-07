@@ -1,10 +1,16 @@
 ﻿# Release Notes
 
-## v1.2.1 - Bug-fix release
+## v2.0.2 Major release
+
+- change: Update the VSIX extension to the newest versions of Visual Studio (2022+)
+
+
+## v1.2.1 Bug-fix release
 
 - added: Adding the new line after the collapsible section otherwise it breaks the markdown
 
-## v1.2.0 - Feature release
+
+## v1.2.0 Feature release
 
 - added: #3 Make it to dotnet CLI tool (dotnet-cstomd)
 - added: #4 Ability to remove specific lines from the md output (cstomd.config)

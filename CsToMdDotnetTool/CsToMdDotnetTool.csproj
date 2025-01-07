@@ -7,12 +7,12 @@
         <ToolCommandName>cstomd</ToolCommandName>
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
-        <VersionPrefix>2.0.1</VersionPrefix>
+        <VersionPrefix>2.0.2</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Maksim Volkau</Authors>
-        <Copyright>Copyright © 2018-2024 Maksim Volkau</Copyright>
+        <Copyright>Copyright © 2018-2025 Maksim Volkau</Copyright>
         <PackageProjectUrl>https://github.com/dadhi/cstomd</PackageProjectUrl>
         <RepositoryUrl>https://github.com/dadhi/cstomd</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
@@ -25,18 +25,18 @@
         <PackageReleaseNotes>
             <![CDATA[
             
-## v2.0.0 - Major release
+## v2.0.2 Major release
 
 - breaking: Updated to run in .NET 6.0 instead of .NET Core 3.1
 - adding: readme.md file to the package
 
 
-## v1.2.1 - Bug-fix release
+## v1.2.1 Bug-fix release
 
 - added: Adding the new line after the collapsible section otherwise it breaks the markdown
 
 
-## v1.2.0 - Feature release
+## v1.2.0 Feature release
 
 - added: #3 Make it to dotnet CLI tool (dotnet-cstomd)
 - added: #4 Ability to remove specific lines from the md output (cstomd.config)

@@ -1,4 +1,5 @@
-﻿/*md
+﻿//# This comment starting from the line in cstomd.config is removed from the output
+/*md
 # Dotnet CLI Tool to convert from .cs to .md
 
 

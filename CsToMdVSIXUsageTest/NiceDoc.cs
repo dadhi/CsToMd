@@ -1,5 +1,5 @@
 ﻿/*md
-## Nice document
+## Example tests as the docs
 
 > Hmm, why?
 
@@ -21,6 +21,7 @@ public class Foo
 }
 /*md
 ```
-//md ~~stripped comment~~
+//md ~~md is stripped in the output~~
+
 End of the nice document.
 md*/
