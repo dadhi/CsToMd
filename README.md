@@ -1,7 +1,8 @@
 # CsToMd
-
 - [CsToMd](#cstomd)
   - [Idea and Overview](#idea-and-overview)
+  - [Visual Studio extension](#visual-studio-extension)
+    - [How to use](#how-to-use)
   - [Dotnet CLI tool](#dotnet-cli-tool)
     - [Ad-hoc document generation](#ad-hoc-document-generation)
     - [Build integration](#build-integration)
@@ -23,6 +24,28 @@ The additional features since v1.2.0:
 
 - Converting the section outlined with `//md{` and `//md}` comments into the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab).
 - The optional `cstomd.config` file in the folder with the lines starters to be removed completely from the generated documentation file.
+
+
+## Visual Studio extension
+
+This extension for Visual Studio 2019+ contains the CustomTool File Generator.
+
+When applied to the C# source file it looks like this:
+
+![VS file properties](screen1.png)
+
+
+The generated result:
+
+![VS result](screen2.png)
+
+
+### How to use
+
+- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the markerplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases).
+- In properties of your .cs file set the `CustomTool` property to `CsToMd`.
+- Save the .cs file
+- Check the generated .md file under the .cs file in Solution Explorer
 
 
 ## Dotnet CLI tool
