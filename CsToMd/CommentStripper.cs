@@ -26,7 +26,6 @@ namespace CsToMd
 
             var isInCollapsibleSection = false;
 
-            var isPrevLineAppended = false;
             for (var i = 0; i < inputLines.Length; i++)
             {
                 var line = inputLines[i];
@@ -70,13 +69,18 @@ namespace CsToMd
                             line = strippedParts.All(p => string.IsNullOrWhiteSpace(p)) ? null : string.Concat(strippedParts);
                             if (line != null)
                             {
-                                // Being smart and remove a single leading space, as it is unusual to have it as indent,
-                                // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example;
-                                if (line.Length > 1 && line[0] == ' ' && line[1] != ' ')
-                                    line = line.Substring(1);
-
                                 // Trim the end spaces, I think this the expected behavior
                                 line = line.TrimEnd();
+
+                                // Being smart here and remove the first space for the odd number of spaces in the leading indent,
+                                // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example;
+                                if (line.Length > 1 && line[0] == ' ')
+                                {
+                                    var spaces = 1;
+                                    while (spaces < line.Length && line[spaces] == ' ') ++spaces;
+                                    if (spaces % 2 == 1)
+                                        line = line.Substring(1);
+                                }
                             }
                         }
                     }
@@ -87,10 +91,9 @@ namespace CsToMd
                     // this logic is required to handle the last line,
                     // that may be not the actual last line, but the removed empty comment line,
                     // see IssueTests.Remove_empty_comment_at_the_end
-                    if (isPrevLineAppended)
+                    if (outputBuilder.Length > 0)
                         outputBuilder.AppendLine();
                     outputBuilder.Append(line);
-                    isPrevLineAppended = true;
                 }
             }
 

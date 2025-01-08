@@ -7,6 +7,7 @@ public class IssueTests
     {
         var result = CommentStripper.StripMdComments(
             """
+                //md   Header
                 //md blah
                 /*md foo bar md*/
             /*md
@@ -22,6 +23,7 @@ public class IssueTests
 
         Assert.Equal(
             """
+              Header
             blah
             foo bar
             xxx
