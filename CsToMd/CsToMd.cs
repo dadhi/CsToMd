@@ -10,8 +10,8 @@ using static System.Environment;
 namespace CsToMd
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration(nameof(CsToMd), 
-        "Generates a Markdown .md file from the input C# .cs file removing the `/*md` and `md*/` comment lines",
+    [InstalledProductRegistration(nameof(CsToMd),
+        "Generates a Markdown .md file from the input C# .cs file removing the specially prefixed comments, e.g. `/*md`, `md*/`, `//md`",
         "2.0.2")]
     [Guid(PackageGuid)]
     [ComVisible(true)]
@@ -33,7 +33,7 @@ namespace CsToMd
             pbstrDefaultExtension = ".md";
             return pbstrDefaultExtension.Length;
         }
-        
+
         /// <summary>Executes the transformation and returns the newly generated output file, whenever a custom tool is loaded,
         /// or the input file is saved.</summary>
         /// <returns>If the method succeeds, it returns <see cref="F:Microsoft.VisualStudio.VSConstants.S_OK" />.

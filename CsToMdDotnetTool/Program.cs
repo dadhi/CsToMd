@@ -83,6 +83,6 @@ The config file should contain the starting lines to exclude from the generated 
 
 ## The end
 
- ~~hand waving~~ :heart:
+~~hand waving~~ :heart:
 
 md*/
