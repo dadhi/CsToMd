@@ -33,4 +33,36 @@ public class IssueTests
             """,
             result);
     }
+
+    // todo: @wip feature
+    //[Fact]
+    public void Issue15_Automatically_wrap_code_in_code_fence_with_the_specified_lang()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            Explicit code fence
+            ```cs md*/
+            var x = 42;
+            /*md
+            ```
+            code:cs
+            Implicit code fence
+            md*/
+            var y = 43;
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            Explicit code fence
+            ```cs
+            var x = 42;
+            ```
+            Implicit code fence
+            ```cs
+            var y = 43;
+            ```
+            """,
+            result);
+    }
 }
