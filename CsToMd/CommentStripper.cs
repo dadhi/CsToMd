@@ -34,6 +34,11 @@ namespace CsToMd
             var newLineBuilder = new StringBuilder(64);
             var area = Area.Code;
             var isMultiLineMdComment = false;
+
+            var isInsideCodeFence = false; // tracking that the parsed character is inside of the code fence
+            var shouldInsertCodeFence = false;
+            var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+
             for (var i = 0; i < inputLines.Length; i++)
             {
                 var line = inputLines[i];
@@ -44,18 +49,17 @@ namespace CsToMd
 
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (outputBuilder.Length != 0) // append the newline after the prev output
-                        outputBuilder.AppendLine();
+                    outputBuilder.AppendNewLineAfterContent();
                     continue;
                 }
 
                 // Given that the length of the valid comment is at least 2 chars, we don't even look into the shorter lines
                 var contentStart = 0;
-                int chars;
-                for (var chi = 0; chi + 1 < line.Length; chi += chars)
+                int stepChars;
+                for (var chi = 0; chi + 1 < line.Length; chi += stepChars)
                 {
-                    chars = 1; // by default step by the single char
-                    var mdCommentInLine = false;
+                    stepChars = 1; // by default step by the single char
+                    var stripMdMarker = false;
                     switch (area)
                     {
                         case Area.Code:
@@ -65,17 +69,17 @@ namespace CsToMd
                                 {
                                     // There may be the line comment inside the multiline comment, and it is ignored by C# and us 
                                     area = Area.LineComment;
-                                    mdCommentInLine = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    chars = mdCommentInLine ? 4 : 2; // at least skip the comment
+                                    stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
+                                    stepChars = stripMdMarker ? 4 : 2; // at least skip the comment
                                 }
                                 else if (line[chi + 1] == '*')
                                 {
                                     // If there was a code before then we expect the opening comment, because it may be a situation
                                     // like `hey*/*md you md*/` denoting either closing or opening comment depending on the context
                                     area = Area.MultiLineComment;
-                                    mdCommentInLine = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    isMultiLineMdComment = mdCommentInLine;
-                                    chars = mdCommentInLine ? 4 : 2; // at least skip the comment
+                                    stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
+                                    isMultiLineMdComment = stripMdMarker;
+                                    stepChars = stripMdMarker ? 4 : 2; // at least skip the comment
                                 }
                             }
                             break;
@@ -84,52 +88,91 @@ namespace CsToMd
                                 && line[chi] == 'm' && line[chi + 1] == 'd'
                                 && chi + 3 < line.Length && line[chi + 2] == '*' && line[chi + 3] == '/')
                             {
-                                mdCommentInLine = true;
+                                stripMdMarker = true;
                                 isMultiLineMdComment = false;
                                 area = Area.Code;
-                                chars = 4;
+                                stepChars = 4;
                             }
                             else if (line[chi] == '*' & line[chi + 1] == '/')
                             {
-                                mdCommentInLine = isMultiLineMdComment; // depending on the opening comment it may be an md as well
+                                stripMdMarker = isMultiLineMdComment; // depending on the opening comment it may be an md as well
                                 isMultiLineMdComment = false;
                                 area = Area.Code;
-                                chars = 2;
+                                stepChars = 2;
+                            }
+                            else if (isMultiLineMdComment
+                                && line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
+                            {
+                                stripMdMarker = true;
+                                var langLength = EatCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                stepChars = CodeFenceLang.Length + langLength;
                             }
                             break;
                         case Area.LineComment:
-                            // ignore everything inside the line comment
+                            if (line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
+                            {
+                                stripMdMarker = true;
+                                var langLength = EatCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                stepChars = CodeFenceLang.Length + langLength;
+                            }
                             break;
                     }
 
-                    // Strip the md comment from the output
-                    if (mdCommentInLine)
+                    // Strip the md comment or code lang from the output
+                    if (stripMdMarker)
                     {
                         // take into account that j is referring to the start of the comment + 1 at this moment
-                        var stripped = line.Substring(contentStart, chi - contentStart);
+                        var stripped = line.AsSpan(contentStart, chi - contentStart);
 
-                        // Trim the leading spaces, with result of indent being stripped too (see #16),
+                        // Trim the leading spaces, with the result of indent being stripped too (see #16),
                         // if you want to preserve the indent, please add the spaces after the starting //md, or /*md comment
                         if (contentStart == 0)
                             stripped = stripped.TrimStart();
 
                         if (stripped.Length != 0)
-                            newLineBuilder.Append(stripped);
+                            newLineBuilder.Append(stripped.ToString());
 
-                        contentStart = chi + chars;
+                        contentStart = chi + stepChars;
                     }
                 }
 
-                // add the strip at the end to the output
+                // Finish the new line by addind the last strip at the end to the output
                 if (contentStart > 0 && contentStart < line.Length)
                     newLineBuilder.Append(line.Substring(contentStart));
 
+                // In principle, where to insert the code fences:
+                // Opening fence line to be inserted on the boundary of the area of the comment to the current Area.Code.
+                // After that it should be marked as `insideCodeFence == true`.
+                // Closing fence line to be inserted on the boundary of Area.Code to the area of the comments.
+                if (shouldInsertCodeFence)
+                {
+                    if (area == Area.Code)
+                    {
+                        if (!isInsideCodeFence)
+                        {
+                            isInsideCodeFence = true;
+                            outputBuilder.AppendNewLineAfterContent().Append(CodeFence).Append(currentCodeFenceLang.ToString());
+                        }
+                    }
+                    else if (isInsideCodeFence)
+                    {
+                        isInsideCodeFence = false;
+                        outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
+                    }
+                }
+                else if (isInsideCodeFence)
+                {
+                    // if the insert code fence mode is switched off but the code fence is not closed yet, let's close it
+                    isInsideCodeFence = false;
+                    outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
+                }
+
                 if (newLineBuilder.Length == 0)
                 {
-                    // Сheck if the line is not consist of the md comment entirely,
+                    // Сheck if the line does not consist of the md comment entirely (contentStart > 0 after the md comment),
                     // If so the remaining empty line is removed (is not appended to the output)
                     if (contentStart == 0)
-                        (outputBuilder.Length != 0 ? outputBuilder.AppendLine() : outputBuilder).Append(line);
+                        outputBuilder.AppendNewLineAfterContent().Append(line);
                 }
                 else
                 {
@@ -144,17 +187,68 @@ namespace CsToMd
                     }
 
                     // I think this is an expected cleaning behavior to remove the dangling spaces at the end of the line
-                    var newLine = newLineBuilder.ToString().TrimEnd();
+                    var newLine = newLineBuilder.ToString().AsSpan().TrimEnd();
                     if (newLine.Length != 0)
-                        (outputBuilder.Length != 0 ? outputBuilder.AppendLine() : outputBuilder).Append(newLine);
+                        outputBuilder.AppendNewLineAfterContent().Append(newLine.ToString());
                     newLineBuilder.Clear();
                 }
             }
 
+            if (shouldInsertCodeFence & isInsideCodeFence)
+                outputBuilder.AppendLine().Append(CodeFence); // insert the closing fence without the lang
+
             return outputBuilder;
         }
 
-        public static StringBuilder StripMdComments2(string[] inputLines, string[] removeLinesStartingWith = null)
+        private static StringBuilder AppendNewLineAfterContent(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
+
+        /// <summary>Returns consumed char count, including possible spaces before the lang or stop dashes</summary> 
+        private static int EatCodeLang(ReadOnlySpan<char> lineTail, ref bool insertCodeFence, ref ReadOnlySpan<char> currentCodeFenceLang)
+        {
+            var langStart = 0;
+            var langLength = 0;
+            var stopLangFound = false;
+            var ch = default(char);
+            for (var i = 0; i < lineTail.Length; ++i)
+            {
+                ch = lineTail[i];
+
+                // at the start or space and not yet saw the lang
+                if (langLength == 0)
+                {
+                    if (char.IsWhiteSpace(ch))
+                    {
+                        ++langStart;
+                        continue; // skip the rest, and check for the lang start again
+                    }
+
+                    if (ch == '-')
+                        stopLangFound = true; // got stop lang dash, so mark it to eat all dashes and stop
+                    else if (!char.IsLetter(ch))
+                        break;
+                }
+                else if (stopLangFound)
+                {
+                    if (ch != '-')
+                        break; // stop eating dashes, when there is a no dash found
+                }
+                else if (!char.IsLetter(ch))
+                    break; // if found non letter, stop the lang lookup altogether
+
+                ++langLength; // in the successful case proceed to count the lang length
+            }
+
+            currentCodeFenceLang = stopLangFound ? ReadOnlySpan<char>.Empty : lineTail.Slice(langStart, langLength);
+            insertCodeFence = !stopLangFound;
+
+            // remove the dangling last space after the lang
+            if (ch == ' ')
+                ++langLength;
+
+            return langStart + langLength;
+        }
+
+        public static StringBuilder StripMdComments_OLD(string[] inputLines, string[] removeLinesStartingWith = null)
         {
             var outputBuilder = new StringBuilder(inputLines.Length * 64);
             var lastLineIndex = inputLines.Length - 1;
