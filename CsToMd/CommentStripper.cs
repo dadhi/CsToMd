@@ -55,10 +55,10 @@ namespace CsToMd
 
                 // Given that the length of the valid comment is at least 2 chars, we don't even look into the shorter lines
                 var contentStart = 0;
-                int stepChars;
-                for (var chi = 0; chi + 1 < line.Length; chi += stepChars)
+                int parsedCharCount;
+                for (var chi = 0; chi + 1 < line.Length; chi += parsedCharCount)
                 {
-                    stepChars = 1; // by default step by the single char
+                    parsedCharCount = 1; // by default step by the single char
                     var stripMdMarker = false;
                     switch (area)
                     {
@@ -70,7 +70,7 @@ namespace CsToMd
                                     // There may be the line comment inside the multiline comment, and it is ignored by C# and us 
                                     area = Area.LineComment;
                                     stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    stepChars = stripMdMarker ? 4 : 2; // at least skip the comment
+                                    parsedCharCount = stripMdMarker ? 4 : 2; // at least skip the comment
                                 }
                                 else if (line[chi + 1] == '*')
                                 {
@@ -79,7 +79,7 @@ namespace CsToMd
                                     area = Area.MultiLineComment;
                                     stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
                                     isMultiLineMdComment = stripMdMarker;
-                                    stepChars = stripMdMarker ? 4 : 2; // at least skip the comment
+                                    parsedCharCount = stripMdMarker ? 4 : 2; // at least skip the comment
                                 }
                             }
                             break;
@@ -91,29 +91,29 @@ namespace CsToMd
                                 stripMdMarker = true;
                                 isMultiLineMdComment = false;
                                 area = Area.Code;
-                                stepChars = 4;
+                                parsedCharCount = 4;
                             }
                             else if (line[chi] == '*' & line[chi + 1] == '/')
                             {
                                 stripMdMarker = isMultiLineMdComment; // depending on the opening comment it may be an md as well
                                 isMultiLineMdComment = false;
                                 area = Area.Code;
-                                stepChars = 2;
+                                parsedCharCount = 2;
                             }
                             else if (isMultiLineMdComment
                                 && line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
                             {
                                 stripMdMarker = true;
-                                var langLength = EatCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
-                                stepChars = CodeFenceLang.Length + langLength;
+                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                parsedCharCount = CodeFenceLang.Length + langLength;
                             }
                             break;
                         case Area.LineComment:
                             if (line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
                             {
                                 stripMdMarker = true;
-                                var langLength = EatCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
-                                stepChars = CodeFenceLang.Length + langLength;
+                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                parsedCharCount = CodeFenceLang.Length + langLength;
                             }
                             break;
                     }
@@ -132,7 +132,7 @@ namespace CsToMd
                         if (stripped.Length != 0)
                             newLineBuilder.Append(stripped.ToString());
 
-                        contentStart = chi + stepChars;
+                        contentStart = chi + parsedCharCount;
                     }
                 }
 
@@ -203,7 +203,7 @@ namespace CsToMd
         private static StringBuilder AppendNewLineAfterContent(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
 
         /// <summary>Returns consumed char count, including possible spaces before the lang or stop dashes</summary> 
-        private static int EatCodeLang(ReadOnlySpan<char> lineTail, ref bool insertCodeFence, ref ReadOnlySpan<char> currentCodeFenceLang)
+        private static int ParseCodeLang(ReadOnlySpan<char> lineTail, ref bool insertCodeFence, ref ReadOnlySpan<char> currentCodeFenceLang)
         {
             var langStart = 0;
             var langLength = 0;
