@@ -21,7 +21,7 @@ namespace CsToMd
         public static readonly string CollapsibleSectionCommentBegin = "//md{";
         public static readonly string CollapsibleSectionCommentEnd = "//md}";
         public static readonly string CollapsibleSectionMarkdownBegin = @"<details><summary><strong>{0}</strong></summary>" + NewLine;
-        public static readonly string CollapsibleSectionMarkdownEnd = @"</details>" + NewLine;
+        public static readonly string CollapsibleSectionMarkdownEnd = @"</details>";
 
         public static readonly string CodeFenceLang = "code:";
         public static readonly string CodeFence = "```";
@@ -35,7 +35,9 @@ namespace CsToMd
             var area = Area.Code;
             var isMultiLineMdComment = false;
 
-            var isInsideCodeFence = false; // tracking that the parsed character is inside of the code fence
+            var isInCollapsibleSection = false;
+
+            var isInCodeFence = false; // tracking that the parsed character is inside of the code fence
             var shouldInsertCodeFence = false;
             var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
 
@@ -69,8 +71,29 @@ namespace CsToMd
                                 {
                                     // There may be the line comment inside the multiline comment, and it is ignored by C# and us 
                                     area = Area.LineComment;
+                                    parsedCharCount = 2;
                                     stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    parsedCharCount = stripMdMarker ? 4 : 2; // at least skip the comment
+                                    if (stripMdMarker)
+                                    {
+                                        parsedCharCount = 4;
+                                        if (chi + 4 < line.Length)
+                                        {
+                                            if (line[chi + 4] == '{')
+                                            {
+                                                isInCollapsibleSection = true;
+                                                newLineBuilder.AppendFormat(CollapsibleSectionMarkdownBegin, line.AsSpan(chi + 5).Trim().ToString());
+                                                parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
+                                                stripMdMarker = false; // don't strip anything, we've already formed the new line above
+                                            }
+                                            else if (line[chi + 4] == '}' & isInCollapsibleSection)
+                                            {
+                                                isInCollapsibleSection = false;
+                                                newLineBuilder.Append(CollapsibleSectionMarkdownEnd).Append(line.AsSpan(chi + 5).Trim().ToString());
+                                                parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
+                                                stripMdMarker = false; // don't strip anything, we've already formed the new line above
+                                            }
+                                        }
+                                    }
                                 }
                                 else if (line[chi + 1] == '*')
                                 {
@@ -122,15 +145,15 @@ namespace CsToMd
                     if (stripMdMarker)
                     {
                         // take into account that j is referring to the start of the comment + 1 at this moment
-                        var stripped = line.AsSpan(contentStart, chi - contentStart);
+                        var content = line.AsSpan(contentStart, chi - contentStart);
 
                         // Trim the leading spaces, with the result of indent being stripped too (see #16),
                         // if you want to preserve the indent, please add the spaces after the starting //md, or /*md comment
                         if (contentStart == 0)
-                            stripped = stripped.TrimStart();
+                            content = content.TrimStart();
 
-                        if (stripped.Length != 0)
-                            newLineBuilder.Append(stripped.ToString());
+                        if (content.Length != 0)
+                            newLineBuilder.Append(content.ToString());
 
                         contentStart = chi + parsedCharCount;
                     }
@@ -148,22 +171,22 @@ namespace CsToMd
                 {
                     if (area == Area.Code)
                     {
-                        if (!isInsideCodeFence)
+                        if (!isInCodeFence)
                         {
-                            isInsideCodeFence = true;
+                            isInCodeFence = true;
                             outputBuilder.AppendNewLineAfterContent().Append(CodeFence).Append(currentCodeFenceLang.ToString());
                         }
                     }
-                    else if (isInsideCodeFence)
+                    else if (isInCodeFence)
                     {
-                        isInsideCodeFence = false;
+                        isInCodeFence = false;
                         outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
                     }
                 }
-                else if (isInsideCodeFence)
+                else if (isInCodeFence)
                 {
                     // if the insert code fence mode is switched off but the code fence is not closed yet, let's close it
-                    isInsideCodeFence = false;
+                    isInCodeFence = false;
                     outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
                 }
 
@@ -187,17 +210,25 @@ namespace CsToMd
                     }
 
                     // I think this is an expected cleaning behavior to remove the dangling spaces at the end of the line
-                    var newLine = newLineBuilder.ToString().AsSpan().TrimEnd();
-                    if (newLine.Length != 0)
-                        outputBuilder.AppendNewLineAfterContent().Append(newLine.ToString());
+                    newLineBuilder.TrimEndTabAndSpaces();
+                    if (newLineBuilder.Length != 0)
+                        outputBuilder.AppendNewLineAfterContent().Append(newLineBuilder);
                     newLineBuilder.Clear();
                 }
             }
 
-            if (shouldInsertCodeFence & isInsideCodeFence)
+            if (shouldInsertCodeFence & isInCodeFence)
                 outputBuilder.AppendLine().Append(CodeFence); // insert the closing fence without the lang
 
             return outputBuilder;
+        }
+
+        private static void TrimEndTabAndSpaces(this StringBuilder sb)
+        {
+            var i = sb.Length - 1;
+            while (i >= 0 && (sb[i] == ' ' | sb[i] == '\t')) --i;
+            if (i < sb.Length - 1)
+                sb.Length = i + 1;
         }
 
         private static StringBuilder AppendNewLineAfterContent(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;

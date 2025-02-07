@@ -41,4 +41,32 @@ public class Tests
             """,
             result);
     }
+
+    [Fact]
+    public void Expand_the_details()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            ## Docs
+            md*/
+            //md{ usings ...  
+            //md```cs
+            namespace DryIoc.Docs;
+            //md```
+            //md}
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ## Docs
+            <details><summary><strong>usings ...</strong></summary>
+
+            ```cs
+            namespace DryIoc.Docs;
+            ```
+            </details>
+            """,
+            result);
+    }
 }
