@@ -13,9 +13,7 @@ namespace CsToMd
         public static readonly string MdMultiLineCommentStart = "/*" + MdCommentLabel;
         public static readonly string MdMultiLineCommentEnd = MdCommentLabel + "*/";
 
-        /// <summary>
-        /// If line contains these symbols, they will be removed from the output
-        /// </summary>
+        /// <summary>If line contains these symbols, they will be removed from the output</summary>
         public static readonly string[] MdComments = { MdLineComment, MdMultiLineCommentStart, MdMultiLineCommentEnd };
 
         public static readonly string CollapsibleSectionCommentBegin = "//md{";
@@ -30,15 +28,15 @@ namespace CsToMd
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
-            var outputBuilder = new StringBuilder(inputLines.Length * 64);
-            var newLineBuilder = new StringBuilder(64);
+            var output = new StringBuilder(inputLines.Length * 64);
+            var outputLine = new StringBuilder(64);
             var area = Area.Code;
             var isMultiLineMdComment = false;
 
             var isInCollapsibleSection = false;
 
             var isInCodeFence = false; // tracking that the parsed character is inside of the code fence
-            var shouldInsertCodeFence = false;
+            var isAutoInsertCodeFence = false;
             var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
 
             for (var i = 0; i < inputLines.Length; i++)
@@ -47,11 +45,11 @@ namespace CsToMd
 
                 // The new line automatically starts the new code if the previous one was a line comment
                 if (area == Area.LineComment)
-                    area = Area.Code;
+                    area = Area.Code; // todo: @wip do we actually know that yet??r
 
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    outputBuilder.AppendNewLineAfterContent();
+                    output.AppendNewLineAfterContent();
                     continue;
                 }
 
@@ -81,14 +79,14 @@ namespace CsToMd
                                             if (line[chi + 4] == '{')
                                             {
                                                 isInCollapsibleSection = true;
-                                                newLineBuilder.AppendFormat(CollapsibleSectionMarkdownBegin, line.AsSpan(chi + 5).Trim().ToString());
+                                                outputLine.AppendFormat(CollapsibleSectionMarkdownBegin, line.AsSpan(chi + 5).Trim().ToString());
                                                 parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
                                                 stripMdMarker = false; // don't strip anything, we've already formed the new line above
                                             }
                                             else if (line[chi + 4] == '}' & isInCollapsibleSection)
                                             {
                                                 isInCollapsibleSection = false;
-                                                newLineBuilder.Append(CollapsibleSectionMarkdownEnd).Append(line.AsSpan(chi + 5).Trim().ToString());
+                                                outputLine.Append(CollapsibleSectionMarkdownEnd).Append(line.AsSpan(chi + 5).Trim().ToString());
                                                 parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
                                                 stripMdMarker = false; // don't strip anything, we've already formed the new line above
                                             }
@@ -127,7 +125,7 @@ namespace CsToMd
                                 && line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
                             {
                                 stripMdMarker = true;
-                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref isAutoInsertCodeFence, ref currentCodeFenceLang);
                                 parsedCharCount = CodeFenceLang.Length + langLength;
                             }
                             break;
@@ -135,7 +133,7 @@ namespace CsToMd
                             if (line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
                             {
                                 stripMdMarker = true;
-                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref isAutoInsertCodeFence, ref currentCodeFenceLang);
                                 parsedCharCount = CodeFenceLang.Length + langLength;
                             }
                             break;
@@ -153,7 +151,7 @@ namespace CsToMd
                             content = content.TrimStart();
 
                         if (content.Length != 0)
-                            newLineBuilder.Append(content.ToString());
+                            outputLine.Append(content.ToString());
 
                         contentStart = chi + parsedCharCount;
                     }
@@ -161,66 +159,68 @@ namespace CsToMd
 
                 // Finish the new line by addind the last strip at the end to the output
                 if (contentStart > 0 && contentStart < line.Length)
-                    newLineBuilder.Append(line.Substring(contentStart));
+                    outputLine.Append(line.Substring(contentStart));
 
                 // In principle, where to insert the code fences:
-                // Opening fence line to be inserted on the boundary of the area of the comment to the current Area.Code.
+                // Opening fence line to be inserted on the boundary of the area of the comment to the current Area.Code
+                // But what if the next line is the md comment again? 
+                // todo: @wip should we then insert the code fence on the next line, and what happens if the next line is empty?
                 // After that it should be marked as `insideCodeFence == true`.
                 // Closing fence line to be inserted on the boundary of Area.Code to the area of the comments.
-                if (shouldInsertCodeFence)
+                if (isAutoInsertCodeFence)
                 {
                     if (area == Area.Code)
                     {
                         if (!isInCodeFence)
                         {
                             isInCodeFence = true;
-                            outputBuilder.AppendNewLineAfterContent().Append(CodeFence).Append(currentCodeFenceLang.ToString());
+                            output.AppendNewLineAfterContent().Append(CodeFence).Append(currentCodeFenceLang.ToString());
                         }
                     }
                     else if (isInCodeFence)
                     {
                         isInCodeFence = false;
-                        outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
+                        output.AppendNewLineAfterContent().Append(CodeFence);
                     }
                 }
                 else if (isInCodeFence)
                 {
                     // if the insert code fence mode is switched off but the code fence is not closed yet, let's close it
                     isInCodeFence = false;
-                    outputBuilder.AppendNewLineAfterContent().Append(CodeFence);
+                    output.AppendNewLineAfterContent().Append(CodeFence);
                 }
 
-                if (newLineBuilder.Length == 0)
+                if (outputLine.Length == 0)
                 {
                     // Сheck if the line does not consist of the md comment entirely (contentStart > 0 after the md comment),
                     // If so the remaining empty line is removed (is not appended to the output)
                     if (contentStart == 0)
-                        outputBuilder.AppendNewLineAfterContent().Append(line);
+                        output.AppendNewLineAfterContent().Append(line);
                 }
                 else
                 {
                     // Being smart here and removing the first space for the odd number of spaces in the leading indent,
                     // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example
-                    if (newLineBuilder.Length > 1 && newLineBuilder[0] == ' ')
+                    if (outputLine.Length > 1 && outputLine[0] == ' ')
                     {
                         var spaces = 1;
-                        while (spaces < newLineBuilder.Length && newLineBuilder[spaces] == ' ') ++spaces;
+                        while (spaces < outputLine.Length && outputLine[spaces] == ' ') ++spaces;
                         if (spaces % 2 == 1)
-                            newLineBuilder.Remove(0, 1);
+                            outputLine.Remove(0, 1);
                     }
 
                     // I think this is an expected cleaning behavior to remove the dangling spaces at the end of the line
-                    newLineBuilder.TrimEndTabAndSpaces();
-                    if (newLineBuilder.Length != 0)
-                        outputBuilder.AppendNewLineAfterContent().Append(newLineBuilder);
-                    newLineBuilder.Clear();
+                    outputLine.TrimEndTabAndSpaces();
+                    if (outputLine.Length != 0)
+                        output.AppendNewLineAfterContent().Append(outputLine);
+                    outputLine.Clear();
                 }
             }
 
-            if (shouldInsertCodeFence & isInCodeFence)
-                outputBuilder.AppendLine().Append(CodeFence); // insert the closing fence without the lang
+            if (isAutoInsertCodeFence & isInCodeFence)
+                output.AppendLine().Append(CodeFence); // insert the closing fence without the lang
 
-            return outputBuilder;
+            return output;
         }
 
         private static void TrimEndTabAndSpaces(this StringBuilder sb)

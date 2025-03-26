@@ -69,4 +69,77 @@ public class Tests
             """,
             result);
     }
+
+    [Fact]
+    public void Add_code_fence_with_the_next_md_comment_again()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            code:cs
+            ## Docs
+            md*/
+            //md foo  
+            //md bar
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ## Docs
+            foo
+            bar
+            """,
+            result);
+    }
+
+    [Fact]
+    public void Add_code_fence_with_the_space_and_the_next_md_comment_again()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            code:cs
+            ## Docs
+            md*/
+
+            //md foo  
+            //md bar
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ## Docs
+
+            foo
+            bar
+            """,
+            result);
+    }
+
+    [Fact]
+    public void Expand_the_details_and_add_code_fence()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            code:cs
+            ## Docs
+            md*/
+            //md{ usings ...  
+            namespace DryIoc.Docs;
+            //md}
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ## Docs
+            <details><summary><strong>usings ...</strong></summary>
+
+            ```cs
+            namespace DryIoc.Docs;
+            ```
+            </details>
+            """,
+            result);
+    }
 }
