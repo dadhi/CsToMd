@@ -101,12 +101,31 @@ namespace CsToMd
                                     //```
                                     //     var x = 1; The inline comment
                                     //```
-                                    // Copy the code between last position and the found md comment to the output line,
-                                    // then update the curr position to the position after the md comment.
+
+                                    // Before adding the span preceding md comment to output, check if it does not contain spaces only.
+                                    // Ignore those leading spaces (#16), e.g. for `  //mdX` output `X`
+                                    // todo: @wip it should be always th space after the `md `, otherwise the User might just mistakenly start the work from `mda` after the comment 
                                     if (lineParserAt - lastOutputAt > 0)
-                                        outputLine.Append(line, lastOutputAt, lineParserAt - lastOutputAt);
+                                    {
+                                        var spanBeforeMdComment = line.AsSpan(lastOutputAt, lineParserAt - lastOutputAt);
+                                        if (!spanBeforeMdComment.IsWhiteSpace())
+                                            outputLine.Append(spanBeforeMdComment);
+                                    }
+
+                                    // Skip a single leading space after the md comment, e.g. for `//md foo` output `foo` without the leading space
+                                    // But keep if it is more than 1 whitespace.
                                     lastOutputAt = lineParserAt + 4;
-                                    lineParserAt += 4; // skip the parser position to after the //md comment
+                                    if (lastOutputAt + 1 < line.Length && line[lastOutputAt] == ' ' & line[lastOutputAt + 1] != ' ')
+                                        ++lastOutputAt;
+
+                                    if (line.Length - lastOutputAt > 1)
+                                    {
+                                        var spanAfterMdComment = line.AsSpan(lastOutputAt);
+                                        if (!spanAfterMdComment.IsWhiteSpace())
+                                            outputLine.Append(spanAfterMdComment);
+                                    }
+
+                                    lineParserAt = line.Length; // parser done with line
                                 }
                             }
                             else if (line[lineParserAt] == '/' & line[lineParserAt + 1] == '*')
@@ -144,16 +163,17 @@ namespace CsToMd
                     }
                 }
 
-                // At the end of the line char-by-char parsing, add the span after the last position output position to the output line.
-                if (lastOutputAt < line.Length)
-                    outputLine.Append(line, lastOutputAt, line.Length - lastOutputAt);
-
-                // Append the result output line to the ouput and clear the output line for the next line cycle.
+                // Append the result output line to the output and clear the output line for the next line cycle.
                 output.AppendNewLineAfterContent();
                 if (outputLine.Length > 0)
                 {
                     output.Append(outputLine);
                     outputLine.Clear();
+                }
+                else if (lastOutputAt == 0)
+                {
+                    // for the empty output and processed pos keept at the start, just append the line as is (parser did found anything interesting)
+                    output.Append(line);
                 }
             }
 

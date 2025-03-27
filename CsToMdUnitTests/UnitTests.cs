@@ -15,9 +15,9 @@ public class Tests
 
         Assert.Equal(
             """
-             foo
+            foo
             var x = 1;
-            var y = 2;  bar
+            var y = 2; bar
             // bazz
             """,
             result);
@@ -31,8 +31,9 @@ public class Tests
             // hey
 
              
-            //md foo
-            //md bar
+              //md foo
+                //md    bar
+             //md 
             var x = 1;
             """.Split(Environment.NewLine)).ToString();
 
@@ -41,8 +42,9 @@ public class Tests
             // hey
             
             
-             foo
-             bar
+            foo
+                bar
+            
             var x = 1;
             """,
             result);
