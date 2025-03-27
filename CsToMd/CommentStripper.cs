@@ -8,7 +8,6 @@ namespace CsToMd
     public static class CommentStripper
     {
         public static readonly string MdCommentLabel = "md";
-
         public static readonly string MdLineComment = "//" + MdCommentLabel;
         public static readonly string MdMultiLineCommentStart = "/*" + MdCommentLabel;
         public static readonly string MdMultiLineCommentEnd = MdCommentLabel + "*/";
@@ -16,209 +15,147 @@ namespace CsToMd
         /// <summary>If line contains these symbols, they will be removed from the output</summary>
         public static readonly string[] MdComments = { MdLineComment, MdMultiLineCommentStart, MdMultiLineCommentEnd };
 
-        public static readonly string CollapsibleSectionCommentBegin = "//md{";
-        public static readonly string CollapsibleSectionCommentEnd = "//md}";
-        public static readonly string CollapsibleSectionMarkdownBegin = @"<details><summary><strong>{0}</strong></summary>" + NewLine;
-        public static readonly string CollapsibleSectionMarkdownEnd = @"</details>";
+        // public static readonly string CollapsibleSectionCommentBegin = "//md{";
+        // public static readonly string CollapsibleSectionCommentEnd = "//md}";
+        // public static readonly string CollapsibleSectionMarkdownBegin = @"<details><summary><strong>{0}</strong></summary>" + NewLine;
+        // public static readonly string CollapsibleSectionMarkdownEnd = @"</details>";
 
         public static readonly string CodeFenceLang = "code:";
         public static readonly string CodeFence = "```";
 
-        enum Area { Code = 0, LineComment, MultiLineComment }
+        enum Scope
+        {
+            Code = 0,
+            LineComment,
+            LineCommentMd,
+            MultiLineComment,
+            MultiLineCommentMd,
+        }
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
             var output = new StringBuilder(inputLines.Length * 64);
             var outputLine = new StringBuilder(64);
-            var area = Area.Code;
-            var isMultiLineMdComment = false;
 
-            var isInCollapsibleSection = false;
+            // var codeFenceLang = CodeFenceLang.AsSpan();
+            // var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
 
-            var isInCodeFence = false; // tracking that the parsed character is inside of the code fence
-            var isAutoInsertCodeFence = false;
-            var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
-
+            // Let's start from the Code as default scope of the parser
+            var prevLineScope = Scope.Code;
+            var scope = Scope.Code;
             for (var i = 0; i < inputLines.Length; i++)
             {
                 var line = inputLines[i];
 
-                // The new line automatically starts the new code if the previous one was a line comment
-                if (area == Area.LineComment)
-                    area = Area.Code; // todo: @wip do we actually know that yet??r
-
-                if (string.IsNullOrWhiteSpace(line))
+                // Trim the empty line and append it to the output right away.
+                if (line.Length == 0 || string.IsNullOrWhiteSpace(line))
                 {
                     output.AppendNewLineAfterContent();
                     continue;
                 }
 
-                // Given that the length of the valid comment is at least 2 chars, we don't even look into the shorter lines
-                var contentStart = 0;
-                int parsedCharCount;
-                for (var chi = 0; chi + 1 < line.Length; chi += parsedCharCount)
+                // We are interested in the lines that may contain the comments or md comments, which at least of 2 chars long.
+                if (line.Length == 1)
                 {
-                    parsedCharCount = 1; // by default step by the single char
-                    var stripMdMarker = false;
-                    switch (area)
+                    output.AppendNewLineAfterContent().Append(line);
+                    continue;
+                }
+
+                // Reset the new line scope to the Code if it was the line comment before, but keep track of this decision 
+                if (scope == Scope.LineComment | scope == Scope.LineCommentMd)
+                {
+                    prevLineScope = scope;
+                    scope = Scope.Code;
+                }
+
+                // The position to track the start of the line span that we should copy to the output line
+                int lastOutputAt = 0;
+
+                // Parse the line char by char, check ahead to have a room of +1 character because we have interested in the comments, which span 2 chars in C# 
+                for (var lineParserAt = 0; lineParserAt + 1 < line.Length;)
+                {
+                    switch (scope)
                     {
-                        case Area.Code:
-                            if (line[chi] == '/')
+                        case Scope.Code:
+                            if (line[lineParserAt] == '/' & line[lineParserAt + 1] == '/')
                             {
-                                if (line[chi + 1] == '/')
+                                scope = Scope.LineComment;
+                                if (lineParserAt + 3 < line.Length &&
+                                    line[lineParserAt + 2] == 'm' & line[lineParserAt + 3] == 'd')
                                 {
-                                    // There may be the line comment inside the multiline comment, and it is ignored by C# and us 
-                                    area = Area.LineComment;
-                                    parsedCharCount = 2;
-                                    stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    if (stripMdMarker)
-                                    {
-                                        parsedCharCount = 4;
-                                        if (chi + 4 < line.Length)
-                                        {
-                                            if (line[chi + 4] == '{')
-                                            {
-                                                isInCollapsibleSection = true;
-                                                outputLine.AppendFormat(CollapsibleSectionMarkdownBegin, line.AsSpan(chi + 5).Trim().ToString());
-                                                parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
-                                                stripMdMarker = false; // don't strip anything, we've already formed the new line above
-                                            }
-                                            else if (line[chi + 4] == '}' & isInCollapsibleSection)
-                                            {
-                                                isInCollapsibleSection = false;
-                                                outputLine.Append(CollapsibleSectionMarkdownEnd).Append(line.AsSpan(chi + 5).Trim().ToString());
-                                                parsedCharCount = line.Length - chi; // indicate that we done with the rest of the line
-                                                stripMdMarker = false; // don't strip anything, we've already formed the new line above
-                                            }
-                                        }
-                                    }
+                                    scope = Scope.LineCommentMd;
+                                    //```
+                                    //    //md Dedicated line comment
+                                    //    var x = 1;
+                                    //```
+                                    // or it may be a line comment after the code in the same line:
+                                    //```
+                                    //     var x = 1; //md The inline comment
+                                    //```
+                                    // The result should be
+                                    //```md
+                                    //     Dedicated line comment
+                                    //     var x = 1;
+                                    //```
+                                    // and
+                                    //```
+                                    //     var x = 1; The inline comment
+                                    //```
+                                    // Copy the code between last position and the found md comment to the output line,
+                                    // then update the curr position to the position after the md comment.
+                                    if (lineParserAt - lastOutputAt > 0)
+                                        outputLine.Append(line, lastOutputAt, lineParserAt - lastOutputAt);
+                                    lastOutputAt = lineParserAt + 4;
+                                    lineParserAt += 4; // skip the parser position to after the //md comment
                                 }
-                                else if (line[chi + 1] == '*')
+                            }
+                            else if (line[lineParserAt] == '/' & line[lineParserAt + 1] == '*')
+                            {
+                                scope = Scope.MultiLineComment;
+                                if (lineParserAt + 3 < line.Length &&
+                                    line[lineParserAt + 2] == 'm' & line[lineParserAt + 3] == 'd')
                                 {
-                                    // If there was a code before then we expect the opening comment, because it may be a situation
-                                    // like `hey*/*md you md*/` denoting either closing or opening comment depending on the context
-                                    area = Area.MultiLineComment;
-                                    stripMdMarker = chi + 3 < line.Length && line[chi + 2] == 'm' && line[chi + 3] == 'd';
-                                    isMultiLineMdComment = stripMdMarker;
-                                    parsedCharCount = stripMdMarker ? 4 : 2; // at least skip the comment
+                                    scope = Scope.MultiLineCommentMd;
+                                    // todo:@wip
                                 }
                             }
+                            else
+                            {
+                                ++lineParserAt; // parse by one char
+                            }
+
                             break;
-                        case Area.MultiLineComment:
-                            if (isMultiLineMdComment
-                                && line[chi] == 'm' && line[chi + 1] == 'd'
-                                && chi + 3 < line.Length && line[chi + 2] == '*' && line[chi + 3] == '/')
-                            {
-                                stripMdMarker = true;
-                                isMultiLineMdComment = false;
-                                area = Area.Code;
-                                parsedCharCount = 4;
-                            }
-                            else if (line[chi] == '*' & line[chi + 1] == '/')
-                            {
-                                stripMdMarker = isMultiLineMdComment; // depending on the opening comment it may be an md as well
-                                isMultiLineMdComment = false;
-                                area = Area.Code;
-                                parsedCharCount = 2;
-                            }
-                            else if (isMultiLineMdComment
-                                && line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
-                            {
-                                stripMdMarker = true;
-                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref isAutoInsertCodeFence, ref currentCodeFenceLang);
-                                parsedCharCount = CodeFenceLang.Length + langLength;
-                            }
+
+                        case Scope.LineComment:
+                            // In case the parser inside the line comment, just skip until the end of the line.
+                            lineParserAt = line.Length;
+                            // todo: @wip
                             break;
-                        case Area.LineComment:
-                            if (line.AsSpan(chi).StartsWith(CodeFenceLang.AsSpan()))
-                            {
-                                stripMdMarker = true;
-                                var langLength = ParseCodeLang(line.AsSpan(chi + CodeFenceLang.Length), ref isAutoInsertCodeFence, ref currentCodeFenceLang);
-                                parsedCharCount = CodeFenceLang.Length + langLength;
-                            }
+
+                        case Scope.LineCommentMd:
+                            // The same as for the normal line comment, we do not expect anything interesting so far until the end of the line
+                            lineParserAt = line.Length;
+                            // todo: @wip
+                            break;
+
+                        case Scope.MultiLineComment:
+                            // todo: @wip
                             break;
                     }
-
-                    // Strip the md comment or code lang from the output
-                    if (stripMdMarker)
-                    {
-                        // take into account that j is referring to the start of the comment + 1 at this moment
-                        var content = line.AsSpan(contentStart, chi - contentStart);
-
-                        // Trim the leading spaces, with the result of indent being stripped too (see #16),
-                        // if you want to preserve the indent, please add the spaces after the starting //md, or /*md comment
-                        if (contentStart == 0)
-                            content = content.TrimStart();
-
-                        if (content.Length != 0)
-                            outputLine.Append(content.ToString());
-
-                        contentStart = chi + parsedCharCount;
-                    }
                 }
 
-                // Finish the new line by addind the last strip at the end to the output
-                if (contentStart > 0 && contentStart < line.Length)
-                    outputLine.Append(line.Substring(contentStart));
+                // At the end of the line char-by-char parsing, add the span after the last position output position to the output line.
+                if (lastOutputAt < line.Length)
+                    outputLine.Append(line, lastOutputAt, line.Length - lastOutputAt);
 
-                // In principle, where to insert the code fences:
-                // Opening fence line to be inserted on the boundary of the area of the comment to the current Area.Code
-                // But what if the next line is the md comment again? 
-                // todo: @wip should we then insert the code fence on the next line, and what happens if the next line is empty?
-                // After that it should be marked as `insideCodeFence == true`.
-                // Closing fence line to be inserted on the boundary of Area.Code to the area of the comments.
-                if (isAutoInsertCodeFence)
+                // Append the result output line to the ouput and clear the output line for the next line cycle.
+                output.AppendNewLineAfterContent();
+                if (outputLine.Length > 0)
                 {
-                    if (area == Area.Code)
-                    {
-                        if (!isInCodeFence)
-                        {
-                            isInCodeFence = true;
-                            output.AppendNewLineAfterContent().Append(CodeFence).Append(currentCodeFenceLang.ToString());
-                        }
-                    }
-                    else if (isInCodeFence)
-                    {
-                        isInCodeFence = false;
-                        output.AppendNewLineAfterContent().Append(CodeFence);
-                    }
-                }
-                else if (isInCodeFence)
-                {
-                    // if the insert code fence mode is switched off but the code fence is not closed yet, let's close it
-                    isInCodeFence = false;
-                    output.AppendNewLineAfterContent().Append(CodeFence);
-                }
-
-                if (outputLine.Length == 0)
-                {
-                    // Сheck if the line does not consist of the md comment entirely (contentStart > 0 after the md comment),
-                    // If so the remaining empty line is removed (is not appended to the output)
-                    if (contentStart == 0)
-                        output.AppendNewLineAfterContent().Append(line);
-                }
-                else
-                {
-                    // Being smart here and removing the first space for the odd number of spaces in the leading indent,
-                    // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example
-                    if (outputLine.Length > 1 && outputLine[0] == ' ')
-                    {
-                        var spaces = 1;
-                        while (spaces < outputLine.Length && outputLine[spaces] == ' ') ++spaces;
-                        if (spaces % 2 == 1)
-                            outputLine.Remove(0, 1);
-                    }
-
-                    // I think this is an expected cleaning behavior to remove the dangling spaces at the end of the line
-                    outputLine.TrimEndTabAndSpaces();
-                    if (outputLine.Length != 0)
-                        output.AppendNewLineAfterContent().Append(outputLine);
+                    output.Append(outputLine);
                     outputLine.Clear();
                 }
             }
-
-            if (isAutoInsertCodeFence & isInCodeFence)
-                output.AppendLine().Append(CodeFence); // insert the closing fence without the lang
 
             return output;
         }
@@ -279,93 +216,93 @@ namespace CsToMd
             return langStart + langLength;
         }
 
-        public static StringBuilder StripMdComments_OLD(string[] inputLines, string[] removeLinesStartingWith = null)
-        {
-            var outputBuilder = new StringBuilder(inputLines.Length * 64);
-            var lastLineIndex = inputLines.Length - 1;
-            var hasLinesToRemove = removeLinesStartingWith != null && removeLinesStartingWith.Length > 0;
+        // public static StringBuilder StripMdComments_OLD(string[] inputLines, string[] removeLinesStartingWith = null)
+        // {
+        //     var outputBuilder = new StringBuilder(inputLines.Length * 64);
+        //     var lastLineIndex = inputLines.Length - 1;
+        //     var hasLinesToRemove = removeLinesStartingWith != null && removeLinesStartingWith.Length > 0;
 
-            var isInCollapsibleSection = false;
-            string codeFenceLang = null;
-            for (var i = 0; i < inputLines.Length; i++)
-            {
-                var line = inputLines[i];
-                if (!string.IsNullOrWhiteSpace(line))
-                {
-                    if (hasLinesToRemove)
-                    {
-                        var removeLine = false;
-                        for (var j = 0; !removeLine && j < removeLinesStartingWith.Length; j++)
-                        {
-                            var lineStartingWith = removeLinesStartingWith[j];
-                            if (!string.IsNullOrWhiteSpace(lineStartingWith) &&
-                                line.StartsWith(lineStartingWith))
-                                removeLine = true;
-                        }
-                        if (removeLine)
-                            continue;
-                    }
+        //     var isInCollapsibleSection = false;
+        //     string codeFenceLang = null;
+        //     for (var i = 0; i < inputLines.Length; i++)
+        //     {
+        //         var line = inputLines[i];
+        //         if (!string.IsNullOrWhiteSpace(line))
+        //         {
+        //             if (hasLinesToRemove)
+        //             {
+        //                 var removeLine = false;
+        //                 for (var j = 0; !removeLine && j < removeLinesStartingWith.Length; j++)
+        //                 {
+        //                     var lineStartingWith = removeLinesStartingWith[j];
+        //                     if (!string.IsNullOrWhiteSpace(lineStartingWith) &&
+        //                         line.StartsWith(lineStartingWith))
+        //                         removeLine = true;
+        //                 }
+        //                 if (removeLine)
+        //                     continue;
+        //             }
 
-                    if (!isInCollapsibleSection && (isInCollapsibleSection = line.StartsWith(CollapsibleSectionCommentBegin)))
-                    {
-                        line = string.Format(CollapsibleSectionMarkdownBegin, line.Substring(CollapsibleSectionCommentBegin.Length).Trim());
-                    }
-                    else if (isInCollapsibleSection && line.StartsWith(CollapsibleSectionCommentEnd))
-                    {
-                        line = CollapsibleSectionMarkdownEnd;
-                        isInCollapsibleSection = false;
-                    }
-                    else
-                    {
-                        // Strip md comments markers from the line. The result of a single stripped part means the line does not contain the md comments.
-                        // If for the some reason we have an empty comment it does not matter and the empty part can be glued back without changing the source line.
+        //             if (!isInCollapsibleSection && (isInCollapsibleSection = line.StartsWith(CollapsibleSectionCommentBegin)))
+        //             {
+        //                 line = string.Format(CollapsibleSectionMarkdownBegin, line.Substring(CollapsibleSectionCommentBegin.Length).Trim());
+        //             }
+        //             else if (isInCollapsibleSection && line.StartsWith(CollapsibleSectionCommentEnd))
+        //             {
+        //                 line = CollapsibleSectionMarkdownEnd;
+        //                 isInCollapsibleSection = false;
+        //             }
+        //             else
+        //             {
+        //                 // Strip md comments markers from the line. The result of a single stripped part means the line does not contain the md comments.
+        //                 // If for the some reason we have an empty comment it does not matter and the empty part can be glued back without changing the source line.
 
-                        // Trim the leading spaces, with result of indent being stripped too (see #16),
-                        // if you want to preserve the indent, please add the spaces after the starting //md, or /*md comment
+        //                 // Trim the leading spaces, with result of indent being stripped too (see #16),
+        //                 // if you want to preserve the indent, please add the spaces after the starting //md, or /*md comment
 
-                        var noLeadingSpaceLine = line.TrimStart();
-                        if (noLeadingSpaceLine.StartsWith(CodeFenceLang))
-                        {
-                            codeFenceLang = noLeadingSpaceLine.Substring(CodeFenceLang.Length).Trim();
-                            line = null; // means to remove the line with code fence from the output
-                        }
+        //                 var noLeadingSpaceLine = line.TrimStart();
+        //                 if (noLeadingSpaceLine.StartsWith(CodeFenceLang))
+        //                 {
+        //                     codeFenceLang = noLeadingSpaceLine.Substring(CodeFenceLang.Length).Trim();
+        //                     line = null; // means to remove the line with code fence from the output
+        //                 }
 
-                        var partsAroundComments = noLeadingSpaceLine.Split(MdComments, StringSplitOptions.None);
-                        if (partsAroundComments.Length != 1)
-                        {
-                            // By convention, the result empty lines are removed
-                            line = partsAroundComments.All(p => string.IsNullOrWhiteSpace(p)) ? null : string.Concat(partsAroundComments);
-                            if (line != null)
-                            {
-                                // Trim the end spaces, I think this the expected behavior
-                                line = line.TrimEnd();
+        //                 var partsAroundComments = noLeadingSpaceLine.Split(MdComments, StringSplitOptions.None);
+        //                 if (partsAroundComments.Length != 1)
+        //                 {
+        //                     // By convention, the result empty lines are removed
+        //                     line = partsAroundComments.All(p => string.IsNullOrWhiteSpace(p)) ? null : string.Concat(partsAroundComments);
+        //                     if (line != null)
+        //                     {
+        //                         // Trim the end spaces, I think this the expected behavior
+        //                         line = line.TrimEnd();
 
-                                // Being smart here and remove the first space for the odd number of spaces in the leading indent,
-                                // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example;
-                                if (line.Length > 1 && line[0] == ' ')
-                                {
-                                    var spaces = 1;
-                                    while (spaces < line.Length && line[spaces] == ' ') ++spaces;
-                                    if (spaces % 2 == 1)
-                                        line = line.Substring(1);
-                                }
-                            }
-                        }
-                    }
-                }
+        //                         // Being smart here and remove the first space for the odd number of spaces in the leading indent,
+        //                         // check the IssueTests.Issue16_Ignore_leading_whitespace_before_md_comments for the example;
+        //                         if (line.Length > 1 && line[0] == ' ')
+        //                         {
+        //                             var spaces = 1;
+        //                             while (spaces < line.Length && line[spaces] == ' ') ++spaces;
+        //                             if (spaces % 2 == 1)
+        //                                 line = line.Substring(1);
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
 
-                if (line != null)
-                {
-                    // this logic is required to handle the last line,
-                    // that may be not the actual last line, but the removed empty comment line,
-                    // see IssueTests.Remove_empty_comment_at_the_end
-                    if (outputBuilder.Length > 0)
-                        outputBuilder.AppendLine();
-                    outputBuilder.Append(line);
-                }
-            }
+        //         if (line != null)
+        //         {
+        //             // this logic is required to handle the last line,
+        //             // that may be not the actual last line, but the removed empty comment line,
+        //             // see IssueTests.Remove_empty_comment_at_the_end
+        //             if (outputBuilder.Length > 0)
+        //                 outputBuilder.AppendLine();
+        //             outputBuilder.Append(line);
+        //         }
+        //     }
 
-            return outputBuilder;
-        }
+        //     return outputBuilder;
+        // }
     }
 }

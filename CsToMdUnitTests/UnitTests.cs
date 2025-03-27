@@ -3,12 +3,29 @@ namespace CsToMd.UnitTests;
 public class Tests
 {
     [Fact]
+    public void Should_strip_the_line_md_comments()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md foo
+            var x = 1;
+            var y = 2; //md bar
+            // bazz
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+             foo
+            var x = 1;
+            var y = 2;  bar
+            // bazz
+            """,
+            result);
+    }
+
+    [Fact]
     public void Keep_nested_md_comment_intact()
     {
-        /*
-        /*md md*/
-        /*md
-        //md */
         var result = CommentStripper.StripMdComments(
             """
             /*
