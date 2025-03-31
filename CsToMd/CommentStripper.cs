@@ -106,8 +106,8 @@ namespace CsToMd
                                     //     var x = 1; The inline comment
                                     //```
 
-                                    // Before adding the span preceding md comment to output, check if it does not contain spaces only.
-                                    // Ignore those leading spaces (#16), e.g. for `  //mdX` output `X`
+                                    // Before adding the span preceding md comment to output, check if it contains spaces only.
+                                    // Ignore those leading spaces (#16), e.g. for `  //md X` output `X`
                                     if (parserAt - outputAt > 0)
                                     {
                                         var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
