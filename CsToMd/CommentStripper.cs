@@ -7,6 +7,7 @@ namespace CsToMd
 {
     public static class CommentStripper
     {
+
         public static readonly string MdCommentLabel = "md";
         public static readonly string MdLineComment = "//" + MdCommentLabel;
         public static readonly string MdMultiLineCommentStart = "/*" + MdCommentLabel;
@@ -14,6 +15,8 @@ namespace CsToMd
 
         /// <summary>If line contains these symbols, they will be removed from the output</summary>
         public static readonly string[] MdComments = { MdLineComment, MdMultiLineCommentStart, MdMultiLineCommentEnd };
+
+        public const int MaxLineToRemoveCount = 64;
 
         // public static readonly string CollapsibleSectionCommentBegin = "//md{";
         // public static readonly string CollapsibleSectionCommentEnd = "//md}";
@@ -34,7 +37,9 @@ namespace CsToMd
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
-            var hasLinesToRemove = removeLinesStartingWith != null && removeLinesStartingWith.Length > 0;
+            // clamp the upper bound of the lines we check to defense against the DoS attack, because we will do the check for the each line, so just in case...
+            var linesToRemoveCount = Math.Min(removeLinesStartingWith?.Length ?? 0, MaxLineToRemoveCount);
+
             var output = new StringBuilder(inputLines.Length * 64);
             var outputLine = new StringBuilder(64);
 
@@ -47,16 +52,30 @@ namespace CsToMd
             for (var i = 0; i < inputLines.Length; i++)
             {
                 var line = inputLines[i];
+                var lineLen = line.Length;
 
                 // Trim the empty line and append it to the output right away.
-                if (line.Length == 0 || string.IsNullOrWhiteSpace(line))
+                if (lineLen == 0 || string.IsNullOrWhiteSpace(line))
                 {
                     output.AppendNewLineAfterContent();
                     continue;
                 }
 
+                // Remove completely the lines that are started with the lines provided by the user
+                if (linesToRemoveCount != 0)
+                {
+                    var removeLine = false;
+                    for (var j = 0; !removeLine && j < linesToRemoveCount; j++)
+                    {
+                        var lineStartingWith = removeLinesStartingWith[j];
+                        removeLine = !string.IsNullOrWhiteSpace(lineStartingWith) && line.StartsWith(lineStartingWith);
+                    }
+                    if (removeLine)
+                        continue; // if line should be removed, just skip it and go to the next line
+                }
+
                 // We are interested in the lines that may contain the comments or md comments, which at least of 2 chars long.
-                if (line.Length == 1)
+                if (lineLen == 1)
                 {
                     output.AppendNewLineAfterContent().Append(line);
                     continue;
@@ -73,7 +92,7 @@ namespace CsToMd
                 int outputAt = 0;
 
                 // Parse the line char by char, check ahead to have a room of +1 character because we have interested in the comments, which span 2 chars in C# 
-                for (var parserAt = 0; parserAt + 1 < line.Length;)
+                for (var parserAt = 0; parserAt + 1 < lineLen;)
                 {
                     switch (scope)
                     {
@@ -81,10 +100,10 @@ namespace CsToMd
                             if (line[parserAt] == '/' & line[parserAt + 1] == '/')
                             {
                                 scope = Scope.LineComment;
-                                var isLineMdComment = parserAt + 3 < line.Length && line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd';
+                                var isLineMdComment = parserAt + 3 < lineLen && line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd';
 
                                 // There should be the space after the `//md` (or the EOL), otherwise the User might just mistakenly start the comment with `//mdabc`
-                                isLineMdComment = isLineMdComment && (parserAt + 4 >= line.Length || char.IsWhiteSpace(line[parserAt + 4]));
+                                isLineMdComment = isLineMdComment && (parserAt + 4 >= lineLen || char.IsWhiteSpace(line[parserAt + 4]));
                                 if (isLineMdComment)
                                 {
                                     scope = Scope.LineCommentMd;
@@ -118,23 +137,23 @@ namespace CsToMd
                                     // Skip a single leading space after the md comment, e.g. for `//md foo` output `foo` without the leading space
                                     // But keep if it is more than 1 whitespace.
                                     outputAt = parserAt + 4;
-                                    if (outputAt + 1 < line.Length && line[outputAt] == ' ' & line[outputAt + 1] != ' ')
+                                    if (outputAt + 1 < lineLen && line[outputAt] == ' ' & line[outputAt + 1] != ' ')
                                         ++outputAt;
 
-                                    if (line.Length - outputAt > 1)
+                                    if (lineLen - outputAt > 1)
                                     {
                                         var spanAfterMdComment = line.AsSpan(outputAt);
                                         if (!spanAfterMdComment.IsWhiteSpace())
                                             outputLine.Append(spanAfterMdComment);
                                     }
 
-                                    parserAt = line.Length; // parser done with line
+                                    parserAt = lineLen; // parser done with line
                                 }
                             }
                             else if (line[parserAt] == '/' & line[parserAt + 1] == '*')
                             {
                                 scope = Scope.MultiLineComment;
-                                if (parserAt + 3 < line.Length &&
+                                if (parserAt + 3 < lineLen &&
                                     line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd')
                                 {
                                     scope = Scope.MultiLineCommentMd;
@@ -150,13 +169,13 @@ namespace CsToMd
 
                         case Scope.LineComment:
                             // In case the parser inside the line comment, just skip until the end of the line.
-                            parserAt = line.Length;
+                            parserAt = lineLen;
                             // todo: @wip
                             break;
 
                         case Scope.LineCommentMd:
                             // The same as for the normal line comment, we do not expect anything interesting so far until the end of the line
-                            parserAt = line.Length;
+                            parserAt = lineLen;
                             // todo: @wip
                             break;
 
