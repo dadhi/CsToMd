@@ -50,6 +50,28 @@ public class Tests
             result);
     }
 
+    [Fact]
+    public void Should_remove_the_specified_line_and_md_comment_without_space_should_be_ignored()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md hey
+             //mdbar
+            --rem oveit
+            var x = 1;
+            """.Split(Environment.NewLine),
+            new[] { "--rem" }
+            ).ToString();
+
+        Assert.Equal(
+            """
+            hey
+             //mdbar
+            var x = 1;
+            """,
+            result);
+    }
+
     // [Fact]
     public void Keep_nested_md_comment_intact()
     {

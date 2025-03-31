@@ -34,6 +34,7 @@ namespace CsToMd
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
+            var hasLinesToRemove = removeLinesStartingWith != null && removeLinesStartingWith.Length > 0;
             var output = new StringBuilder(inputLines.Length * 64);
             var outputLine = new StringBuilder(64);
 
@@ -69,19 +70,22 @@ namespace CsToMd
                 }
 
                 // The position to track the start of the line span that we should copy to the output line
-                int lastOutputAt = 0;
+                int outputAt = 0;
 
                 // Parse the line char by char, check ahead to have a room of +1 character because we have interested in the comments, which span 2 chars in C# 
-                for (var lineParserAt = 0; lineParserAt + 1 < line.Length;)
+                for (var parserAt = 0; parserAt + 1 < line.Length;)
                 {
                     switch (scope)
                     {
                         case Scope.Code:
-                            if (line[lineParserAt] == '/' & line[lineParserAt + 1] == '/')
+                            if (line[parserAt] == '/' & line[parserAt + 1] == '/')
                             {
                                 scope = Scope.LineComment;
-                                if (lineParserAt + 3 < line.Length &&
-                                    line[lineParserAt + 2] == 'm' & line[lineParserAt + 3] == 'd')
+                                var isLineMdComment = parserAt + 3 < line.Length && line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd';
+
+                                // There should be the space after the `//md` (or the EOL), otherwise the User might just mistakenly start the comment with `//mdabc`
+                                isLineMdComment = isLineMdComment && (parserAt + 4 >= line.Length || char.IsWhiteSpace(line[parserAt + 4]));
+                                if (isLineMdComment)
                                 {
                                     scope = Scope.LineCommentMd;
                                     //```
@@ -104,35 +108,34 @@ namespace CsToMd
 
                                     // Before adding the span preceding md comment to output, check if it does not contain spaces only.
                                     // Ignore those leading spaces (#16), e.g. for `  //mdX` output `X`
-                                    // todo: @wip it should be always th space after the `md `, otherwise the User might just mistakenly start the work from `mda` after the comment 
-                                    if (lineParserAt - lastOutputAt > 0)
+                                    if (parserAt - outputAt > 0)
                                     {
-                                        var spanBeforeMdComment = line.AsSpan(lastOutputAt, lineParserAt - lastOutputAt);
+                                        var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
                                         if (!spanBeforeMdComment.IsWhiteSpace())
                                             outputLine.Append(spanBeforeMdComment);
                                     }
 
                                     // Skip a single leading space after the md comment, e.g. for `//md foo` output `foo` without the leading space
                                     // But keep if it is more than 1 whitespace.
-                                    lastOutputAt = lineParserAt + 4;
-                                    if (lastOutputAt + 1 < line.Length && line[lastOutputAt] == ' ' & line[lastOutputAt + 1] != ' ')
-                                        ++lastOutputAt;
+                                    outputAt = parserAt + 4;
+                                    if (outputAt + 1 < line.Length && line[outputAt] == ' ' & line[outputAt + 1] != ' ')
+                                        ++outputAt;
 
-                                    if (line.Length - lastOutputAt > 1)
+                                    if (line.Length - outputAt > 1)
                                     {
-                                        var spanAfterMdComment = line.AsSpan(lastOutputAt);
+                                        var spanAfterMdComment = line.AsSpan(outputAt);
                                         if (!spanAfterMdComment.IsWhiteSpace())
                                             outputLine.Append(spanAfterMdComment);
                                     }
 
-                                    lineParserAt = line.Length; // parser done with line
+                                    parserAt = line.Length; // parser done with line
                                 }
                             }
-                            else if (line[lineParserAt] == '/' & line[lineParserAt + 1] == '*')
+                            else if (line[parserAt] == '/' & line[parserAt + 1] == '*')
                             {
                                 scope = Scope.MultiLineComment;
-                                if (lineParserAt + 3 < line.Length &&
-                                    line[lineParserAt + 2] == 'm' & line[lineParserAt + 3] == 'd')
+                                if (parserAt + 3 < line.Length &&
+                                    line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd')
                                 {
                                     scope = Scope.MultiLineCommentMd;
                                     // todo:@wip
@@ -140,20 +143,20 @@ namespace CsToMd
                             }
                             else
                             {
-                                ++lineParserAt; // parse by one char
+                                ++parserAt; // parse by one char
                             }
 
                             break;
 
                         case Scope.LineComment:
                             // In case the parser inside the line comment, just skip until the end of the line.
-                            lineParserAt = line.Length;
+                            parserAt = line.Length;
                             // todo: @wip
                             break;
 
                         case Scope.LineCommentMd:
                             // The same as for the normal line comment, we do not expect anything interesting so far until the end of the line
-                            lineParserAt = line.Length;
+                            parserAt = line.Length;
                             // todo: @wip
                             break;
 
@@ -170,9 +173,9 @@ namespace CsToMd
                     output.Append(outputLine);
                     outputLine.Clear();
                 }
-                else if (lastOutputAt == 0)
+                else if (outputAt == 0)
                 {
-                    // for the empty output and processed pos keept at the start, just append the line as is (parser did found anything interesting)
+                    // for the empty output and processed pos kept at the start, just append the line as is (parser did found anything interesting)
                     output.Append(line);
                 }
             }
