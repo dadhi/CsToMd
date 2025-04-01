@@ -41,10 +41,13 @@ namespace CsToMd
             var linesToRemoveCount = Math.Min(removeLinesStartingWith?.Length ?? 0, MaxLineToRemoveCount);
 
             var output = new StringBuilder(inputLines.Length * 64);
-            var outputLine = new StringBuilder(64);
+            var outputForLine = new StringBuilder(64); // the reused buffer for the output produced by parsing the input line
 
             // var codeFenceLang = CodeFenceLang.AsSpan();
             // var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+
+            // Tracks the current level of nesting of the details expansion, where 0 means there is no expansion.
+            var inDetailsLevel = 0;
 
             // Let's start from the Code as default scope of the parser
             var prevLineScope = Scope.Code;
@@ -100,13 +103,22 @@ namespace CsToMd
                             if (line[parserAt] == '/' & line[parserAt + 1] == '/')
                             {
                                 scope = Scope.LineComment;
+
                                 var isLineMdComment = parserAt + 3 < lineLen && line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd';
 
-                                // There should be the space after the `//md` (or the EOL), otherwise the User might just mistakenly start the comment with `//mdabc`
-                                isLineMdComment = isLineMdComment && (parserAt + 4 >= lineLen || char.IsWhiteSpace(line[parserAt + 4]));
+                                // Check the next char after md comment to validate it
+                                var charAfterMd = '0';
+                                if (isLineMdComment & parserAt + 4 < lineLen)
+                                {
+                                    charAfterMd = line[parserAt + 4];
+                                    // Found the unexpected not matching details end `//md}`
+                                    isLineMdComment = !(charAfterMd == '}' & inDetailsLevel <= 0);
+                                }
+
                                 if (isLineMdComment)
                                 {
                                     scope = Scope.LineCommentMd;
+
                                     //```
                                     //    //md Dedicated line comment
                                     //    var x = 1;
@@ -124,14 +136,13 @@ namespace CsToMd
                                     //```
                                     //     var x = 1; The inline comment
                                     //```
-
                                     // Before adding the span preceding md comment to output, check if it contains spaces only.
-                                    // Ignore those leading spaces (#16), e.g. for `  //md X` output `X`
+                                    // Ignore those leading spaces (#16), e.g. for `  //mdX` output `X`
                                     if (parserAt - outputAt > 0)
                                     {
                                         var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
                                         if (!spanBeforeMdComment.IsWhiteSpace())
-                                            outputLine.Append(spanBeforeMdComment);
+                                            outputForLine.Append(spanBeforeMdComment.ToString());
                                     }
 
                                     // Skip a single leading space after the md comment, e.g. for `//md foo` output `foo` without the leading space
@@ -140,11 +151,32 @@ namespace CsToMd
                                     if (outputAt + 1 < lineLen && line[outputAt] == ' ' & line[outputAt + 1] != ' ')
                                         ++outputAt;
 
+                                    // Process the expansion of the `//md{ foo\nbar\n//md} into the `<details><summary><strong>foo</strong></summary>\n\nbar\n</details>`
+                                    if (charAfterMd == '{')
+                                    {
+                                        ++inDetailsLevel;
+                                        var summary = line.AsSpan(parserAt + 5).Trim();
+                                        outputForLine.Append("<details><summary><strong>").Append(summary.ToString());
+                                        // The additional new line is required here for the markdown processing of summary
+                                        outputForLine.AppendLine("</strong></summary>");
+
+                                        // The whole line until the end is added to the summary, so we may break
+                                        parserAt = lineLen;
+                                        break;
+                                    }
+
+                                    if (charAfterMd == '}')
+                                    {
+                                        --inDetailsLevel; // no need to check that the ending tag has a matching closing tag, because we deed it above for the `isLineMdComment`
+                                        outputForLine.Append("</details>");
+                                        outputAt = parserAt + 5; // skip the `//md}` to parse the rest of the line
+                                    }
+
                                     if (lineLen - outputAt > 1)
                                     {
                                         var spanAfterMdComment = line.AsSpan(outputAt);
                                         if (!spanAfterMdComment.IsWhiteSpace())
-                                            outputLine.Append(spanAfterMdComment);
+                                            outputForLine.Append(spanAfterMdComment.ToString());
                                     }
 
                                     parserAt = lineLen; // parser done with line
@@ -153,11 +185,12 @@ namespace CsToMd
                             else if (line[parserAt] == '/' & line[parserAt + 1] == '*')
                             {
                                 scope = Scope.MultiLineComment;
-                                if (parserAt + 3 < lineLen &&
-                                    line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd')
+                                var isMultiLineMdComment = parserAt + 3 < lineLen && line[parserAt + 2] == 'm' & line[parserAt + 3] == 'd';
+                                isMultiLineMdComment = isMultiLineMdComment && (parserAt + 4 >= lineLen || char.IsWhiteSpace(line[parserAt + 4]));
+                                if (isMultiLineMdComment)
                                 {
                                     scope = Scope.MultiLineCommentMd;
-                                    // todo:@wip
+                                    // todo: @wip
                                 }
                             }
                             else
@@ -187,14 +220,14 @@ namespace CsToMd
 
                 // Append the result output line to the output and clear the output line for the next line cycle.
                 output.AppendNewLineAfterContent();
-                if (outputLine.Length > 0)
+                if (outputForLine.Length > 0)
                 {
-                    output.Append(outputLine);
-                    outputLine.Clear();
+                    output.Append(outputForLine);
+                    outputForLine.Clear();
                 }
                 else if (outputAt == 0)
                 {
-                    // for the empty output and processed pos kept at the start, just append the line as is (parser did found anything interesting)
+                    // for the empty output and processed position kept at the start, just append the line as is (parser did not found anything interesting)
                     output.Append(line);
                 }
             }

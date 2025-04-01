@@ -66,7 +66,7 @@ public class Tests
         Assert.Equal(
             """
             hey
-             //mdbar
+            bar
             var x = 1;
             """,
             result);
@@ -108,14 +108,12 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Expand_the_details()
     {
         var result = CommentStripper.StripMdComments(
             """
-            /*md
-            ## Docs
-            md*/
+            //md ## Docs
             //md{ usings ...  
             //md```cs
             namespace DryIoc.Docs;
