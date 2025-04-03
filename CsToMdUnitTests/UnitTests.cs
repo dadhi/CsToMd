@@ -44,7 +44,6 @@ public class Tests
             
             foo
                 bar
-            
             var x = 1;
             """,
             result);
@@ -72,7 +71,42 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
+    public void Should_remove_multiline_comments()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md  
+            oh/*judy*/ho
+            /*md
+            xxx
+            */
+            /*md foo md*/ oof
+              /*md bar */ 
+              /*md  baz 
+              md*/ xyz
+              var x = 1;
+            /* zzz */
+            //md end
+            """.Split(Environment.NewLine)
+            ).ToString();
+
+        Assert.Equal(
+            """
+            oh/*judy*/ho
+            xxx
+            foo oof
+            bar
+              baz
+            xyz
+              var x = 1;
+            /* zzz */
+            end
+            """,
+            result);
+    }
+
+    //[Fact]
     public void Keep_nested_md_comment_intact()
     {
         var result = CommentStripper.StripMdComments(
@@ -92,8 +126,8 @@ public class Tests
             result);
     }
 
-    // [Fact]
-    public void Remove_empty_comment_at_the_end()
+    [Fact]
+    public void Should_remove_empty_comment_at_the_end()
     {
         var result = CommentStripper.StripMdComments(
             """

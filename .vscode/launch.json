@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/CsToMdDotnetTool/bin/Debug/netcoreapp3.1/cstomd.dll",
+            "program": "${workspaceFolder}/CsToMdTestRunner/bin/Debug/net9.0/CsToMdTestRunner.exe",
             "args": [],
-            "cwd": "${workspaceFolder}/CsToMdDotnetTool",
+            "cwd": "${workspaceFolder}/CsToMdTestRunner",
             "console": "internalConsole",
             "stopAtEntry": false
         },
