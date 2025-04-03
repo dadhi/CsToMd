@@ -106,7 +106,7 @@ public class Tests
             result);
     }
 
-    //[Fact]
+    [Fact]
     public void Keep_nested_md_comment_intact()
     {
         var result = CommentStripper.StripMdComments(
