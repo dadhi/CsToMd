@@ -1,18 +1,20 @@
 ﻿/*md
-## Example tests as the docs
+## Tests are the docs
 
-> Hmm, why?
+**How so?**
 
-*Why not* and here is the proof
+    As simple as adding 'md' to the normal C# comments,
+    with the bonus of solving a hard problem of collapsible sections >:
+
 md*/
-//md{ collapsible section with using(s) ...
+//md{ Collapsed usings ...
 //md```
 using System;
 using System.Text;
 //md```
 //md}
 
-//- removed comment
+//- line to be removed
 
 //md```cs
 public class Foo
@@ -21,7 +23,6 @@ public class Foo
 }
 /*md
 ```
-//md ~~md is stripped in the output~~
+//md <- 'md' is kept when nested inside the md comment
 
-End of the nice document.
-md*/
+*/ //md*no need for the closing md comment to include 'md'*

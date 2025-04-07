@@ -56,7 +56,7 @@ public class Tests
             """
             //md hey
              //mdbar
-            --rem oveit
+            --rem this line
             var x = 1;
             """.Split(Environment.NewLine),
             new[] { "--rem" }
@@ -72,7 +72,7 @@ public class Tests
     }
 
     [Fact]
-    public void Should_remove_multiline_comments()
+    public void Should_parse_multiline_comments()
     {
         var result = CommentStripper.StripMdComments(
             """
@@ -164,6 +164,74 @@ public class Tests
             namespace DryIoc.Docs;
             ```
             </details>
+            """,
+            result);
+    }
+
+    [Fact]
+    public void Usage_test()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md
+            ## Tests are the docs
+
+            **How so?**
+
+                As simple as adding 'md' to the normal C# comments,
+                with the bonus of solving a hard problem of collapsible sections >:
+
+            md*/
+            //md{ Collapsed usings ...
+            //md```
+            using System;
+            using System.Text;
+            //md```
+            //md}
+
+            //- line to be removed
+
+            //md```cs
+            public class Foo
+            {
+                public void Bar() { }
+            }
+            /*md
+            ```
+            //md <- 'md' is kept when nested inside the md comment
+
+            */ //md*no need for the closing md comment to include 'md'*
+
+            """.Split(Environment.NewLine), new[] { "//-" }).ToString();
+
+        Assert.Equal(
+            """
+            ## Tests are the docs
+
+            **How so?**
+
+                As simple as adding 'md' to the normal C# comments,
+                with the bonus of solving a hard problem of collapsible sections >:
+
+            <details><summary><strong>Collapsed usings ...</strong></summary>
+
+            ```
+            using System;
+            using System.Text;
+            ```
+            </details>
+
+
+            ```cs
+            public class Foo
+            {
+                public void Bar() { }
+            }
+            ```
+            //md <- 'md' is kept when nested inside the md comment
+
+            *no need for the closing md comment to include 'md'*
+
             """,
             result);
     }

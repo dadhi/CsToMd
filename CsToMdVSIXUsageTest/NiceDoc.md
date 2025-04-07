@@ -1,9 +1,11 @@
-## Example tests as the docs
+## Tests are the docs
 
-> Hmm, why?
+**How so?**
 
-*Why not* and here is the proof
-<details><summary><strong>collapsible section with using(s) ...</strong></summary>
+    As simple as adding 'md' to the normal C# comments,
+    with the bonus of solving a hard problem of collapsible sections >:
+
+<details><summary><strong>Collapsed usings ...</strong></summary>
 
 ```
 using System;
@@ -12,13 +14,13 @@ using System.Text;
 </details>
 
 
-
 ```cs
 public class Foo
 {
     public void Bar() { }
 }
 ```
- ~~md is stripped in the output~~
+//md <- 'md' is kept when nested inside the md comment
 
-End of the nice document.
+*no need for the closing md comment to include 'md'*
+

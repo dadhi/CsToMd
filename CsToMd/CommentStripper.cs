@@ -7,7 +7,6 @@ namespace CsToMd
 {
     public static class CommentStripper
     {
-
         public static readonly string MdCommentLabel = "md";
         public static readonly string MdLineComment = "//" + MdCommentLabel;
         public static readonly string MdMultiLineCommentStart = "/*" + MdCommentLabel;
@@ -91,13 +90,13 @@ namespace CsToMd
                     scope = Scope.Code;
                 }
 
-                int outputAt = 0; // The position to track the start of the line span that we should copy to the output line
+                var outputAt = 0; // The position to track the start of the line span that we should copy to the output line
                 var parserAt = 0;
+                var lineDone = false;
 
-                // It is fine to finish before the last char, because the comments are at least 2 char lenght, 
+                // It is fine to finish before the last char, because the comments are at least 2 char length, 
                 // so it need to read the next char without the check for line length.
-                var lastCharAt = lineLen - 1;
-                while (parserAt < lastCharAt)
+                while (!lineDone & parserAt < lineLen - 1)
                 {
                     switch (scope)
                     {
@@ -142,9 +141,8 @@ namespace CsToMd
                                         // The additional new line is required here for the markdown processing of summary
                                         outputForLine.AppendLine("</strong></summary>");
 
-                                        // The whole line until the end is added to the summary
-                                        parserAt = lastCharAt;
-                                        outputAt = lastCharAt;
+                                        outputAt = lineLen; // the whole line is processed
+                                        lineDone = true;
                                     }
                                     else if (charAfterMd == '}')
                                     {
@@ -153,8 +151,8 @@ namespace CsToMd
 
                                         outputForLine.Append("</details>");
 
-                                        parserAt = lastCharAt; // parser done
                                         ++outputAt; // skip the `//md}` to consume the tail of the line below
+                                        lineDone = true;
                                     }
                                     else if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
                                     {
@@ -260,7 +258,7 @@ namespace CsToMd
                             break;
 
                         default:
-                            parserAt = lastCharAt;
+                            lineDone = true;
                             break;
                     }
                 }
@@ -271,7 +269,7 @@ namespace CsToMd
                 else
                 {
                     // Add the remaining tail of the line, e.g. `md*/ foo` or `/*md baz   `
-                    if (parserAt >= lastCharAt & lineLen > outputAt)
+                    if (outputAt < lineLen)
                     {
                         var lineTail = line.AsSpan(outputAt, lineLen - outputAt).TrimEnd();
                         if (lineTail.Length != 0)
