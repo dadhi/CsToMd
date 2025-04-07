@@ -288,7 +288,7 @@ namespace CsToMd
             return output;
         }
 
-#if NETFRAMEWORK
+#if !NET5_OR_GREATER
         // Polyfill for the .NET Framework
         private static StringBuilder Append(this StringBuilder sb, ReadOnlySpan<char> fragment) =>
             sb.Append(fragment.ToString());
