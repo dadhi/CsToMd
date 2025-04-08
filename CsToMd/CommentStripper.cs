@@ -22,7 +22,7 @@ namespace CsToMd
         // public static readonly string CollapsibleSectionMarkdownBegin = @"<details><summary><strong>{0}</strong></summary>" + NewLine;
         // public static readonly string CollapsibleSectionMarkdownEnd = @"</details>";
 
-        public static readonly string CodeFenceLang = "code:";
+        public static readonly string CodeFenceLangMarker = "code:";
         public static readonly string CodeFence = "```";
 
         enum Scope
@@ -42,8 +42,9 @@ namespace CsToMd
             var output = new StringBuilder(inputLines.Length * 64);
             var outputForLine = new StringBuilder(64); // the reused buffer for the output produced by parsing the input line
 
-            // var codeFenceLang = CodeFenceLang.AsSpan();
-            // var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+            var codeFenceLangMarker = CodeFenceLangMarker.AsSpan();
+            var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+            var shouldInsertCodeFence = false;
 
             // Tracks the current level of nesting of the details expansion, where 0 means there is no expansion.
             var inDetailsLevel = 0;
@@ -120,7 +121,6 @@ namespace CsToMd
                                 {
                                     scope = Scope.LineCommentMd;
 
-                                    // Skip a single space after the comment, but keep multiple as it may be a User intent, e.g. for `//md foo` output `foo`
                                     if (parserAt - outputAt > 0)
                                     {
                                         var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
@@ -154,11 +154,27 @@ namespace CsToMd
                                         ++outputAt; // skip the `//md}` to consume the tail of the line below
                                         lineDone = true;
                                     }
-                                    else if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
+                                    else
                                     {
+                                        // Parse the code fence marker immediately after the md comment
+                                        var tail = line.AsSpan(parserAt);
+                                        var tailWoSpace = tail.TrimStart();
+                                        if (tailWoSpace.StartsWith(codeFenceLangMarker))
+                                        {
+                                            var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+
+                                            // Skip the `code: lang` and stop immediatly after the lang
+                                            var spaceLen = tail.Length - tailWoSpace.Length;
+                                            parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
+                                            outputAt = parserAt;
+                                        }
+
                                         // Skip a single leading space after the md comment, e.g. in `//md foo` output `foo`
-                                        ++parserAt;
-                                        ++outputAt;
+                                        if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
+                                        {
+                                            ++parserAt;
+                                            ++outputAt;
+                                        }
                                     }
                                 }
                                 else
@@ -185,9 +201,22 @@ namespace CsToMd
                                     parserAt += 4; // skip over the opening md comment `/*md`
                                     outputAt = parserAt;
 
+                                    // Parse the code fence marker immediately after the md comment
+                                    var tail = line.AsSpan(parserAt);
+                                    var tailWoSpace = tail.TrimStart();
+                                    if (tailWoSpace.StartsWith(codeFenceLangMarker))
+                                    {
+                                        var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+
+                                        // Skip the `code: lang` and stop immediatly after the lang
+                                        var spaceLen = tail.Length - tailWoSpace.Length;
+                                        parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
+                                        outputAt = parserAt;
+                                    }
+
+                                    // Skip a single leading space after the md comment, e.g. in `/*md foo` output `foo`
                                     if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
                                     {
-                                        // Skip a single leading space after the md comment, e.g. in `/*md foo` output `foo`
                                         ++parserAt;
                                         ++outputAt;
                                     }
@@ -253,7 +282,30 @@ namespace CsToMd
                             }
                             else
                             {
-                                ++parserAt;
+                                if (parserAt == 0)
+                                {
+                                    // Parse the code fence marker immediately after the md comment
+                                    var tail = line.AsSpan();
+                                    var tailWoSpace = tail.TrimStart();
+                                    if (tailWoSpace.StartsWith(codeFenceLangMarker))
+                                    {
+                                        var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+
+                                        // Skip the `code: lang` and stop immediatly after the lang
+                                        var spaceLen = tail.Length - tailWoSpace.Length;
+                                        parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
+                                        outputAt = parserAt;
+                                    }
+                                    else
+                                    {
+                                        // If the code fence is not found we still may fast skip the whitespaces, and avoid looking for the code fence multiple times
+                                        parserAt = tail.Length - tailWoSpace.Length + 1;
+                                    }
+                                }
+                                else
+                                {
+                                    ++parserAt;
+                                }
                             }
                             break;
 
@@ -294,14 +346,6 @@ namespace CsToMd
             sb.Append(fragment.ToString());
 #endif
 
-        private static void TrimEndTabAndSpaces(this StringBuilder sb)
-        {
-            var i = sb.Length - 1;
-            while (i >= 0 && (sb[i] == ' ' | sb[i] == '\t')) --i;
-            if (i < sb.Length - 1)
-                sb.Length = i + 1;
-        }
-
         private static StringBuilder AppendLineToNonEmpty(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
 
         /// <summary>Returns consumed char count, including possible spaces before the lang or stop dashes</summary> 
@@ -332,7 +376,7 @@ namespace CsToMd
                 else if (stopLangFound)
                 {
                     if (ch != '-')
-                        break; // stop eating dashes, when there is a no dash found
+                        break; // stop eating dashes, when there is no dash found
                 }
                 else if (!char.IsLetter(ch))
                     break; // if found non letter, stop the lang lookup altogether

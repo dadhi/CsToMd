@@ -236,14 +236,17 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Add_code_fence_with_the_next_md_comment_again()
     {
         var result = CommentStripper.StripMdComments(
             """
-            /*md
-            code:cs
+            //md code: cs
+            /*md code: x
+            code:--
+              code:    cs  
             ## Docs
+                 code: cs Hey!  
             md*/
             //md foo  
             //md bar
@@ -252,6 +255,7 @@ public class Tests
         Assert.Equal(
             """
             ## Docs
+            Hey!
             foo
             bar
             """,
