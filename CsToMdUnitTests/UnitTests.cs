@@ -262,7 +262,7 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Add_code_fence_with_the_space_and_the_next_md_comment_again()
     {
         var result = CommentStripper.StripMdComments(
