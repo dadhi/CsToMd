@@ -286,7 +286,7 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Expand_the_details_and_add_code_fence()
     {
         var result = CommentStripper.StripMdComments(

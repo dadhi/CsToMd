@@ -36,7 +36,7 @@ namespace CsToMd
 
         public static StringBuilder StripMdComments(string[] inputLines, string[] removeLinesStartingWith = null)
         {
-            // clamp the upper bound of the lines we check to defense against the DoS attack, because we will do the check for the each line, so just in case...
+            // Clamp the upper bound of the lines we check to defense against the DoS attack, because we will do the check for the each line, so just in case...
             var linesToRemoveCount = Math.Min(removeLinesStartingWith?.Length ?? 0, MaxLineToRemoveCount);
 
             var output = new StringBuilder(inputLines.Length * 64);
@@ -45,6 +45,7 @@ namespace CsToMd
             var codeFenceLangMarker = CodeFenceLangMarker.AsSpan();
             var currentCodeFenceLang = ReadOnlySpan<char>.Empty;
             var shouldInsertCodeFence = false;
+            var insideTheCodeFence = false;
 
             // Tracks the current level of nesting of the details expansion, where 0 means there is no expansion.
             var inDetailsLevel = 0;
@@ -84,12 +85,10 @@ namespace CsToMd
                     continue;
                 }
 
-                // Reset the new line scope to the Code if it was the line comment before, but keep track of this decision 
+                prevLineScope = scope;
+                // Reset the new line scope to the Code if the previous line was a LineComment
                 if (scope == Scope.LineComment | scope == Scope.LineCommentMd)
-                {
-                    prevLineScope = scope;
                     scope = Scope.Code;
-                }
 
                 var outputAt = 0; // The position to track the start of the line span that we should copy to the output line
                 var parserAt = 0;
@@ -126,6 +125,12 @@ namespace CsToMd
                                         var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
                                         if (!spanBeforeMdComment.IsWhiteSpace())
                                             outputForLine.Append(spanBeforeMdComment);
+                                    }
+
+                                    if (shouldInsertCodeFence & insideTheCodeFence & prevLineScope == Scope.Code)
+                                    {
+                                        insideTheCodeFence = false;
+                                        outputForLine.AppendLineToNonEmpty().AppendLine(CodeFence);
                                     }
 
                                     parserAt += 4;
@@ -198,6 +203,12 @@ namespace CsToMd
                                             outputForLine.Append(spanBeforeMdComment);
                                     }
 
+                                    if (shouldInsertCodeFence & insideTheCodeFence & prevLineScope == Scope.Code)
+                                    {
+                                        insideTheCodeFence = false;
+                                        outputForLine.AppendLineToNonEmpty().AppendLine(CodeFence);
+                                    }
+
                                     parserAt += 4; // skip over the opening md comment `/*md`
                                     outputAt = parserAt;
 
@@ -206,7 +217,8 @@ namespace CsToMd
                                     var tailWoSpace = tail.TrimStart();
                                     if (tailWoSpace.StartsWith(codeFenceLangMarker))
                                     {
-                                        var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                        var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
+                                            ref shouldInsertCodeFence, ref currentCodeFenceLang);
 
                                         // Skip the `code: lang` and stop immediatly after the lang
                                         var spaceLen = tail.Length - tailWoSpace.Length;
@@ -228,9 +240,15 @@ namespace CsToMd
                             }
                             else
                             {
+                                // Add the code fence if it is defined and there was not md comment previously
+                                if (shouldInsertCodeFence & !insideTheCodeFence)
+                                {
+                                    insideTheCodeFence = true;
+                                    output.AppendLineToNonEmpty().Append(CodeFence).Append(currentCodeFenceLang);
+                                }
+
                                 ++parserAt; // by default parse the Code by one char
                             }
-
                             break;
 
                         case Scope.MultiLineComment:
@@ -315,9 +333,11 @@ namespace CsToMd
                     }
                 }
 
-                // If the output kept at 0, parser did not found anything interesting (md comments), so adding the whole input line
+                // If the output kept at 0, parser did not the md comments, so adding the whole input line
                 if (outputAt == 0)
+                {
                     output.AppendLineToNonEmpty().Append(line.TrimEnd()); // remove the trailing spaces from the line
+                }
                 else
                 {
                     // Add the remaining tail of the line, e.g. `md*/ foo` or `/*md baz   `
