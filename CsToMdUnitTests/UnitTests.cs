@@ -241,12 +241,14 @@ public class Tests
     {
         var result = CommentStripper.StripMdComments(
             """
-            //md code: cs
-            /*md code: x
-            code:--
-              code:    cs  
+            //md code:cs
+            /*md code:x
+                 code: cs!  
+            code:---
+            code:
+            code:-   
+              code:cs  
             ## Docs
-                 code: cs Hey!  
             md*/
             //md foo  
             //md bar
@@ -255,7 +257,7 @@ public class Tests
         Assert.Equal(
             """
             ## Docs
-            Hey!
+            cs!
             foo
             bar
             """,
@@ -309,6 +311,27 @@ public class Tests
             namespace DryIoc.Docs;
             ```
             </details>
+            """,
+            result);
+    }
+
+    // [Fact]
+    public void Empty_lang_code_fence()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md code:
+            var x = 3; /*md fenced */
+
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ```
+            var x = 3;
+            ```
+            fenced
+
             """,
             result);
     }

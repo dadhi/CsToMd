@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using static System.Environment;
@@ -166,7 +167,8 @@ namespace CsToMd
                                         var tailWoSpace = tail.TrimStart();
                                         if (tailWoSpace.StartsWith(codeFenceLangMarker))
                                         {
-                                            var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                            var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
+                                                ref shouldInsertCodeFence, ref currentCodeFenceLang);
 
                                             // Skip the `code: lang` and stop immediatly after the lang
                                             var spaceLen = tail.Length - tailWoSpace.Length;
@@ -368,50 +370,37 @@ namespace CsToMd
 
         private static StringBuilder AppendLineToNonEmpty(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
 
-        /// <summary>Returns consumed char count, including possible spaces before the lang or stop dashes</summary> 
+        /// <summary>The code lang should start immediately without spaces before it and consist and should end with the white space.
+        /// Returns consumed char count.</summary> 
         private static int ParseCodeLang(ReadOnlySpan<char> lineTail, ref bool insertCodeFence, ref ReadOnlySpan<char> currentCodeFenceLang)
         {
-            var langStart = 0;
-            var langLength = 0;
-            var stopLangFound = false;
-            var ch = default(char);
-            for (var i = 0; i < lineTail.Length; ++i)
+            // Insert the code fence but without the lang label
+            if (lineTail.Length == 0 || char.IsWhiteSpace(lineTail[0]))
             {
-                ch = lineTail[i];
+                currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+                insertCodeFence = true;
+                return 0;
+            }
+            Debug.Assert(lineTail.Length > 0);
 
-                // at the start or space and not yet saw the lang
-                if (langLength == 0)
-                {
-                    if (char.IsWhiteSpace(ch))
-                    {
-                        ++langStart;
-                        continue; // skip the rest, and check for the lang start again
-                    }
-
-                    if (ch == '-')
-                        stopLangFound = true; // got stop lang dash, so mark it to eat all dashes and stop
-                    else if (!char.IsLetter(ch))
-                        break;
-                }
-                else if (stopLangFound)
-                {
-                    if (ch != '-')
-                        break; // stop eating dashes, when there is no dash found
-                }
-                else if (!char.IsLetter(ch))
-                    break; // if found non letter, stop the lang lookup altogether
-
-                ++langLength; // in the successful case proceed to count the lang length
+            // Found stop lang dash, now comsume the remaining dashes until non-dash
+            if (lineTail[0] == '-')
+            {
+                var i = 1;
+                while (i < lineTail.Length && lineTail[i] == '-')
+                    ++i;
+                currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+                insertCodeFence = false;
+                return i;
             }
 
-            currentCodeFenceLang = stopLangFound ? ReadOnlySpan<char>.Empty : lineTail.Slice(langStart, langLength);
-            insertCodeFence = !stopLangFound;
-
-            // remove the dangling last space after the lang
-            if (ch == ' ')
-                ++langLength;
-
-            return langStart + langLength;
+            // Found the lang, now consume it until the first space or end of the line
+            var j = 1;
+            while (j < lineTail.Length && !char.IsWhiteSpace(lineTail[j]))
+                ++j;
+            currentCodeFenceLang = lineTail.Slice(0, j);
+            insertCodeFence = true;
+            return j;
         }
 
         // public static StringBuilder StripMdComments_OLD(string[] inputLines, string[] removeLinesStartingWith = null)

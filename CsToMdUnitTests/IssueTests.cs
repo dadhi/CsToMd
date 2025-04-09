@@ -45,7 +45,7 @@ public class IssueTests
             //md```js
             const y = function() {};
             //md```
-            //md code: cs back to cs, space after colon
+            //md code:cs back to cs, space after colon
             """.Split(Environment.NewLine)).ToString();
 
         Assert.Equal(
@@ -69,7 +69,7 @@ public class IssueTests
             """
             /*md
             code:js
-            code: ---
+            code:---
             Explicit code fence
             ```cs
             // hey md*/
