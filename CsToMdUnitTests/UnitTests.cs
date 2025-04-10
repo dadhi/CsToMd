@@ -325,15 +325,21 @@ public class Tests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Empty_lang_code_fence()
     {
         var result = CommentStripper.StripMdComments(
             """
             //md code:
             var x = 3; /*md fenced */
+                //- removed
 
-            """.Split(Environment.NewLine)).ToString();
+            /*md Hey June,
+            */  ++x;     /*md fenced */
+
+
+            ~~~removed too
+            """.Split(Environment.NewLine), new[] { "//-", "~~~" }).ToString();
 
         Assert.Equal(
             """
@@ -341,6 +347,13 @@ public class Tests
             var x = 3;
             ```
             fenced
+
+            Hey June,
+            ```
+              ++x;
+            ```
+            fenced
+
 
             """,
             result);

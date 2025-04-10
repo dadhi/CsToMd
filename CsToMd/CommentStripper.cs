@@ -66,14 +66,16 @@ namespace CsToMd
                     continue;
                 }
 
-                // Remove completely the lines that are started with the lines provided by the user
+                // Remove completely the lines that are started with the lines provided by the user.
+                // The remove line marker may start after some leading spaces.
                 if (linesToRemoveCount != 0)
                 {
                     var removeLine = false;
                     for (var j = 0; !removeLine && j < linesToRemoveCount; j++)
                     {
                         var lineStartingWith = removeLinesStartingWith[j];
-                        removeLine = !string.IsNullOrWhiteSpace(lineStartingWith) && line.StartsWith(lineStartingWith);
+                        removeLine = !string.IsNullOrWhiteSpace(lineStartingWith) &&
+                            line.AsSpan().TrimStart().StartsWith(lineStartingWith);
                     }
                     if (removeLine)
                         continue; // if line should be removed, just skip it and go to the next line
@@ -197,18 +199,20 @@ namespace CsToMd
                                 {
                                     scope = Scope.MultiLineCommentMd;
 
+                                    var hasCode = false;
                                     if (parserAt - outputAt > 0)
                                     {
                                         // Ignore the spaces-only span before the start of the multiline comment
                                         var spanBeforeMdComment = line.AsSpan(outputAt, parserAt - outputAt);
-                                        if (!spanBeforeMdComment.IsWhiteSpace())
+                                        hasCode = !spanBeforeMdComment.IsWhiteSpace();
+                                        if (hasCode)
                                             outputForLine.Append(spanBeforeMdComment);
                                     }
 
-                                    if (shouldInsertCodeFence & insideTheCodeFence & prevLineScope == Scope.Code)
+                                    if (shouldInsertCodeFence & insideTheCodeFence & (hasCode | prevLineScope == Scope.Code))
                                     {
                                         insideTheCodeFence = false;
-                                        outputForLine.AppendLineToNonEmpty().AppendLine(CodeFence);
+                                        outputForLine.TrimEndTabAndSpaces().AppendLineToNonEmpty().AppendLine(CodeFence);
                                     }
 
                                     parserAt += 4; // skip over the opening md comment `/*md`
@@ -369,6 +373,15 @@ namespace CsToMd
 #endif
 
         private static StringBuilder AppendLineToNonEmpty(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
+
+        private static StringBuilder TrimEndTabAndSpaces(this StringBuilder sb)
+        {
+            var i = sb.Length - 1;
+            while (i >= 0 && (sb[i] == ' ' | sb[i] == '\t')) --i;
+            if (i < sb.Length - 1)
+                sb.Length = i + 1;
+            return sb;
+        }
 
         /// <summary>The code lang should start immediately without spaces before it and consist and should end with the white space.
         /// Returns consumed char count as the length of the lang + the space (if the lang is ended with space).</summary> 
