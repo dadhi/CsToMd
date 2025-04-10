@@ -1,18 +1,9 @@
 ﻿# Release Notes
 
-## v2.0.2 Major release
+## v2.1.0 Major release
 
-- change: Update the VSIX extension to the newest versions of Visual Studio (2022+)
+- feature: #15 Directive to wrap code in Markdown code blocks
+- feature: #16 Ignore leading whitespace before md comments
+- feature: #17 Allow to close the md comment without md prefix
 
-
-## v1.2.1 Bug-fix release
-
-- added: Adding the new line after the collapsible section otherwise it breaks the markdown
-
-
-## v1.2.0 Feature release
-
-- added: #3 Make it to dotnet CLI tool (dotnet-cstomd)
-- added: #4 Ability to remove specific lines from the md output (cstomd.config)
-- added: #6 Add the special comments to wrap the section into collapsible details enhancement
-- added: #7 Strip the comment from the line with `//md` enhancement
+- change: #18 Avoid removing md comments inside the normal comments

@@ -20,8 +20,9 @@ Now you have **the documentation always up-to-date with the runnable samples** i
 
 You may check the DryIoc [documentation project](https://github.com/dadhi/DryIoc/tree/master/docs/DryIoc.Docs) for the real-world case example.
 
-The additional features since v1.2.0:
+The additional features:
 
+- Directive to automatically wrap code in code fence with the optional language, e.g. add `//md code:csharp`, or just `//md code:` to add fences, and `//md code:--` to stop adding fences. The directive may be used multiple times through the file.
 - Converting the section outlined with `//md{` and `//md}` comments into the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab).
 - The optional `cstomd.config` file in the folder with the lines starters to be removed completely from the generated documentation file.
 

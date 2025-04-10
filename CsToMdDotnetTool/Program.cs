@@ -10,7 +10,7 @@
 
 ## Why?
 
-//md{ Because !
+//md{ See for yourself ...
 
 - still a valid C# `code` file,
     * a nice markdown documentation,

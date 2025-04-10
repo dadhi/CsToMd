@@ -12,7 +12,7 @@ namespace CsToMd
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration(nameof(CsToMd),
         "Generates a Markdown .md file from the input C# .cs file removing the specially prefixed comments, e.g. `/*md`, `md*/`, `//md`",
-        "2.0.2")]
+        "2.1.0")]
     [Guid(PackageGuid)]
     [ComVisible(true)]
     [ProvideObject(typeof(CsToMd))]

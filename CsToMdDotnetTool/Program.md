@@ -8,7 +8,7 @@
 
 ## Why?
 
-<details><summary><strong>Because !</strong></summary>
+<details><summary><strong>See for yourself...</strong></summary>
 
 
 - still a valid C# `code` file,

@@ -3,9 +3,9 @@
     xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"
     xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="CsToMd.59fbd7f5-938f-430b-a0d3-4496467ceaf8" Version="2.0.2" Language="en-US" Publisher="dadhi" />
+        <Identity Id="CsToMd.59fbd7f5-938f-430b-a0d3-4496467ceaf8" Version="2.1.0" Language="en-US" Publisher="dadhi" />
         <DisplayName>CsToMd</DisplayName>
-        <Description xml:space="preserve">Generates  Markdown documentation file from the input C# file by removing the `/*md`, `md*/`, "//md" comments</Description>
+        <Description xml:space="preserve">Generates Markdown documentation file from the input C# file by removing the `/*md`, `md*/`, "//md" comments</Description>
         <MoreInfo>https://github.com/dadhi/CsToMd</MoreInfo>
         <License>LICENSE.txt</License>
         <ReleaseNotes>ReleaseNotes.txt</ReleaseNotes>
@@ -17,10 +17,10 @@
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Pro">
+        <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Pro">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
+        <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
     </Installation>

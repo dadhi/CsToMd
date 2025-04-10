@@ -7,7 +7,7 @@
         <ToolCommandName>cstomd</ToolCommandName>
         <AssemblyName>cstomd</AssemblyName>
         <PackageId>dotnet-cstomd</PackageId>
-        <VersionPrefix>2.0.2</VersionPrefix>
+        <VersionPrefix>2.1.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <PackageOutputPath>..\.nupkg</PackageOutputPath>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -17,31 +17,20 @@
         <RepositoryUrl>https://github.com/dadhi/cstomd</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicense>https://github.com/dadhi/cstomd/blob/master/LICENSE</PackageLicense>
-        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <Description>Dotnet CLI Tool for converting the C# file with the normal Unit Tests to the Markdown documentation file</Description>
         <PackageTags>cli dotnet dotnet-tool csharp tests markdown documentation live-documentation literate-programming</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageReleaseNotes>
             <![CDATA[
-            
-## v2.0.2 Major release
+## v2.1.0 Major release
 
-- breaking: Updated to run in .NET 6.0 instead of .NET Core 3.1
-- adding: readme.md file to the package
+- feature: #15 Directive to wrap code in Markdown code blocks
+- feature: #16 Ignore leading whitespace before md comments
+- feature: #17 Allow to close the md comment without md prefix
 
-
-## v1.2.1 Bug-fix release
-
-- added: Adding the new line after the collapsible section otherwise it breaks the markdown
-
-
-## v1.2.0 Feature release
-
-- added: #3 Make it to dotnet CLI tool (dotnet-cstomd)
-- added: #4 Ability to remove specific lines from the md output (cstomd.config)
-- added: #6 Add the special comments to wrap the section into collapsible details enhancement
-- added: #7 Strip the comment from the line with `//md` enhancement
+- change: #18 Avoid removing md comments inside the normal comments
 
 ]]>
         </PackageReleaseNotes>
