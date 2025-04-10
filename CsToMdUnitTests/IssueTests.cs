@@ -63,6 +63,25 @@ public class IssueTests
     }
 
     [Fact]
+    public void Issue15_Simplest_test()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md code:
+            var x = 42;
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ```
+            var x = 42;
+            ```
+
+            """,
+            result);
+    }
+
+    [Fact]
     public void Issue15_Automatically_wrap_code_in_code_fence_with_the_specified_lang()
     {
         var result = CommentStripper.StripMdComments(

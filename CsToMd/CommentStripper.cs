@@ -88,11 +88,6 @@ namespace CsToMd
                     continue;
                 }
 
-                prevLineScope = scope;
-                // Reset the new line scope to the Code if the previous line was a LineComment
-                if (scope == Scope.LineComment | scope == Scope.LineCommentMd)
-                    scope = Scope.Code;
-
                 var outputAt = 0; // The position to track the start of the line span that we should copy to the output line
                 var parserAt = 0;
                 var lineDone = false;
@@ -362,6 +357,13 @@ namespace CsToMd
                         outputForLine.Clear();
                     }
                 }
+
+                // Reset the new line scope to the Code if the previous line was a LineComment
+                // Note: that we set it here at the end of the loop and not at the start, to correctly work in the last iteration, 
+                // so that final code after the loop below would always work
+                prevLineScope = scope;
+                if (scope == Scope.LineComment | scope == Scope.LineCommentMd)
+                    scope = Scope.Code;
             }
 
             if (shouldInsertCodeFence & insideTheCodeFence & prevLineScope == Scope.Code)
