@@ -40,4 +40,17 @@
         <None Include="..\LICENSE" Pack="True" PackagePath="\" Visible="false" />
         <None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
     </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Program.cs">
+        <Generator>CsToMd</Generator>
+        <LastGenOutput>Program.md</LastGenOutput>
+      </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="Program.md">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Program.cs</DependentUpon>
+      </None>
+    </ItemGroup>
 </Project>

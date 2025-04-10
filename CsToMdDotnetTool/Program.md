@@ -7,15 +7,12 @@
 
 
 ## Why?
-
-<details><summary><strong>See for yourself...</strong></summary>
-
+<details><summary><strong>See for yourself ...</strong></summary>
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
 </details>
-
 
 <details><summary><strong>usings ...</strong></summary>
 
@@ -26,7 +23,6 @@ using CsToMd;
 using static System.Console;
 ```
 </details>
-
 
 ```cs
 class Program
@@ -83,5 +79,4 @@ The config file should contain the starting lines to exclude from the generated 
 
 ## The end
 
- ~~hand waving~~ :heart:
-
+~~hand waving~~ :heart:

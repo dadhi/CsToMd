@@ -1,5 +1,5 @@
 ﻿//# This comment starting from the line in cstomd.config is removed from the output
-/*md
+/*md code:cs
 # Dotnet CLI Tool to convert from .cs to .md
 
 
@@ -9,25 +9,22 @@
 
 
 ## Why?
-
+*/
 //md{ See for yourself ...
-
+/*md
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
+md*/
 //md}
 
-md*/
 //md{ usings ...
-//md```cs
 using System;
 using System.IO;
 using CsToMd;
 using static System.Console;
-//md```
 //md}
 
-//md```cs
 class Program
 {
     const string _expectedArgs = @"The tool expects the first argument to be the path to the `.cs` file,
@@ -79,8 +76,6 @@ The config file should contain the starting lines to exclude from the generated 
     }
 }
 /*md
-```
-
 ## The end
 
 ~~hand waving~~ :heart:

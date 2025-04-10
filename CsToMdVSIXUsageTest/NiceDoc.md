@@ -1,4 +1,4 @@
-## Tests are the docs
+## The tests are the docs
 
 **How so?**
 
@@ -7,9 +7,10 @@
 
 <details><summary><strong>Collapsed usings ...</strong></summary>
 
-```
+```cs
 using System;
 using System.Text;
+using System.Collections.Generic;
 ```
 </details>
 
@@ -20,7 +21,7 @@ public class Foo
     public void Bar() { }
 }
 ```
+
 //md <- 'md' is kept when nested inside the md comment
 
 *no need for the closing md comment to include 'md'*
-
