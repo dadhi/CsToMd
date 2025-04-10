@@ -243,21 +243,31 @@ public class Tests
             """
             //md code:cs
             /*md code:x
-                 code: cs!  
+                 code: foo!  
+                code:--  bar!
+                code:---bazz!  
             code:---
             code:
             code:-   
               code:cs  
+              code:cs
             ## Docs
             md*/
+            var x = 3; //md hey!
             //md foo  
             //md bar
             """.Split(Environment.NewLine)).ToString();
 
         Assert.Equal(
             """
+            foo!
+             bar!
+            bazz!
             ## Docs
-            cs!
+            ```cs
+            var x = 3; 
+            ```
+            hey!
             foo
             bar
             """,

@@ -371,17 +371,19 @@ namespace CsToMd
         private static StringBuilder AppendLineToNonEmpty(this StringBuilder sb) => sb.Length != 0 ? sb.AppendLine() : sb;
 
         /// <summary>The code lang should start immediately without spaces before it and consist and should end with the white space.
-        /// Returns consumed char count.</summary> 
+        /// Returns consumed char count as the length of the lang + the space (if the lang is ended with space).</summary> 
         private static int ParseCodeLang(ReadOnlySpan<char> lineTail, ref bool insertCodeFence, ref ReadOnlySpan<char> currentCodeFenceLang)
         {
+            // The defaults:
+            insertCodeFence = true;
+            currentCodeFenceLang = ReadOnlySpan<char>.Empty;
+
             // Insert the code fence but without the lang label
-            if (lineTail.Length == 0 || char.IsWhiteSpace(lineTail[0]))
-            {
-                currentCodeFenceLang = ReadOnlySpan<char>.Empty;
-                insertCodeFence = true;
+            if (lineTail.Length == 0)
                 return 0;
-            }
-            Debug.Assert(lineTail.Length > 0);
+
+            if (char.IsWhiteSpace(lineTail[0]))
+                return 1;
 
             // Found stop lang dash, now comsume the remaining dashes until non-dash
             if (lineTail[0] == '-')
@@ -389,9 +391,8 @@ namespace CsToMd
                 var i = 1;
                 while (i < lineTail.Length && lineTail[i] == '-')
                     ++i;
-                currentCodeFenceLang = ReadOnlySpan<char>.Empty;
                 insertCodeFence = false;
-                return i;
+                return i < lineTail.Length && char.IsWhiteSpace(lineTail[i]) ? i + 1 : i; // Count the ending space
             }
 
             // Found the lang, now consume it until the first space or end of the line
@@ -399,8 +400,7 @@ namespace CsToMd
             while (j < lineTail.Length && !char.IsWhiteSpace(lineTail[j]))
                 ++j;
             currentCodeFenceLang = lineTail.Slice(0, j);
-            insertCodeFence = true;
-            return j;
+            return j < lineTail.Length ? j + 1 : j; // Count the ending space
         }
 
         // public static StringBuilder StripMdComments_OLD(string[] inputLines, string[] removeLinesStartingWith = null)
