@@ -2,12 +2,12 @@ namespace CsToMd.UnitTests;
 
 public class IssueTests
 {
-    // [Fact]
+    [Fact]
     public void Issue16_Ignore_leading_whitespace_before_md_comments()
     {
         var result = CommentStripper.StripMdComments(
             """
-                //md   Header
+                //md    Header
                 //md blah
                 /*md foo bar md*/
             /*md
@@ -23,7 +23,7 @@ public class IssueTests
 
         Assert.Equal(
             """
-              Header
+                Header
             blah
             foo bar
             xxx
@@ -34,7 +34,7 @@ public class IssueTests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Issue15_Simplified_case_from_the_issue()
     {
         var result = CommentStripper.StripMdComments(
