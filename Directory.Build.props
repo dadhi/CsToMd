@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <Authors>Maksim Volkau</Authors>
+        <Copyright>Copyright © 2018-2025 Maksim Volkau</Copyright>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+</Project>
