@@ -62,7 +62,7 @@ public class IssueTests
             result);
     }
 
-    // [Fact]
+    [Fact]
     public void Issue15_Automatically_wrap_code_in_code_fence_with_the_specified_lang()
     {
         var result = CommentStripper.StripMdComments(
@@ -79,7 +79,7 @@ public class IssueTests
             code:cs
             Implicit code fence will be inserted here with the lang specified on the line above
             md*/
-            var y = 43;
+            var y = 43;   
             """.Split(Environment.NewLine)).ToString();
 
         Assert.Equal(
@@ -93,6 +93,7 @@ public class IssueTests
             ```cs
             var y = 43;
             ```
+
             """,
             result);
     }

@@ -342,6 +342,7 @@ namespace CsToMd
                 // If the output kept at 0, parser did not the md comments, so adding the whole input line
                 if (outputAt == 0)
                 {
+                    // todo: @perf TrimEnd without allocation
                     output.AppendLineToNonEmpty().Append(line.TrimEnd()); // remove the trailing spaces from the line
                 }
                 else
@@ -361,6 +362,11 @@ namespace CsToMd
                         outputForLine.Clear();
                     }
                 }
+            }
+
+            if (shouldInsertCodeFence & insideTheCodeFence & prevLineScope == Scope.Code)
+            {
+                output.AppendLineToNonEmpty().AppendLine(CodeFence);
             }
 
             return output;
