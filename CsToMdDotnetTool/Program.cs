@@ -10,7 +10,7 @@
 
 ## Why?
 */
-//md{ See for yourself ...
+//md{<strong>See for yourself ...</strong>
 /*md
 - still a valid C# `code` file,
     * a nice markdown documentation,

@@ -7,7 +7,7 @@
 
 
 ## Why?
-<details><summary>See for yourself ...</summary>
+<details><summary><strong>See for yourself ...</strong></summary>
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
