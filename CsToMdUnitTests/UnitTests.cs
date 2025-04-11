@@ -158,7 +158,7 @@ public class Tests
         Assert.Equal(
             """
             ## Docs
-            <details><summary><strong>usings ...</strong></summary>
+            <details><summary>usings ...</summary>
 
             ```cs
             namespace DryIoc.Docs;
@@ -213,7 +213,7 @@ public class Tests
                 As simple as adding 'md' to the normal C# comments,
                 with the bonus of solving a hard problem of collapsible sections >:
 
-            <details><summary><strong>Collapsed usings ...</strong></summary>
+            <details><summary>Collapsed usings ...</summary>
 
             ```
             using System;
@@ -315,7 +315,7 @@ public class Tests
         Assert.Equal(
             """
             ## Docs
-            <details><summary><strong>usings ...</strong></summary>
+            <details><summary>usings ...</summary>
 
             ```cs
             namespace DryIoc.Docs;

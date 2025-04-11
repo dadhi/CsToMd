@@ -117,7 +117,7 @@ namespace CsToMd
                                     parserAt += 4;
                                     outputAt = parserAt;
 
-                                    // Process the expansion of the `//md{ foo\nbar\n//md} into the `<details><summary><strong>foo</strong></summary>\n\nbar\n</details>`
+                                    // Process the expansion of the `//md{ foo\nbar\n//md} into the `<details><summary>foo</summary>\n\nbar\n</details>`
                                     if (charAfterMd == '{')
                                     {
                                         ++inDetailsLevel;
@@ -195,7 +195,7 @@ namespace CsToMd
                                     parserAt += 4; // skip over the opening md comment `/*md`
                                     outputAt = parserAt;
 
-                                    // Process the expansion of the `/*md{ foo\nbar\n}*/ into the `<details><summary><strong>foo</strong></summary>\nbar\n</details>`
+                                    // Process the expansion of the `/*md{ foo\nbar\n}*/ into the `<details><summary>foo</summary>\nbar\n</details>`
                                     if (parserAt < lineLen && line[parserAt] == '{')
                                     {
                                         ++inDetailsLevel;

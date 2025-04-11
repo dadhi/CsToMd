@@ -7,14 +7,14 @@
 
 
 ## Why?
-<details><summary><strong>See for yourself ...</strong></summary>
+<details><summary>See for yourself ...</summary>
 
 - still a valid C# `code` file,
     * a nice markdown documentation,
         + and [all around awesome!](#end-of-the-document)
 </details>
 
-<details><summary><strong>usings ...</strong></summary>
+<details><summary>usings ...</summary>
 
 ```cs
 using System;
