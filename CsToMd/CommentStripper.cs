@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 
 namespace CsToMd
@@ -32,7 +33,7 @@ namespace CsToMd
             var insideTheCodeFence = false;
 
             // Tracks the current level of nesting of the details expansion, where 0 means there is no expansion.
-            var inDetailsLevel = 0;
+            var collapsibleLevel = 0;
 
             // Let's start from the Code as default scope of the parser
             var prevLineScope = Scope.Code;
@@ -94,7 +95,7 @@ namespace CsToMd
                                 {
                                     charAfterMd = line[parserAt + 4];
                                     // Found the unexpected not matching details end `//md}`
-                                    isLineMdComment = !(charAfterMd == '}' & inDetailsLevel <= 0);
+                                    isLineMdComment = !(charAfterMd == '}' & collapsibleLevel <= 0);
                                 }
 
                                 if (isLineMdComment)
@@ -120,7 +121,7 @@ namespace CsToMd
                                     // Process the expansion of the `//md{ foo\nbar\n//md} into the `<details><summary>foo</summary>\n\nbar\n</details>`
                                     if (charAfterMd == '{')
                                     {
-                                        ++inDetailsLevel;
+                                        ++collapsibleLevel;
 
                                         var summary = line.AsSpan(outputAt + 1).Trim();
                                         // The additional new line at the end is required for the proper processing of summary
@@ -132,7 +133,7 @@ namespace CsToMd
                                     else if (charAfterMd == '}')
                                     {
                                         // No need to check if the ending tag has a matching closing tag, because we deed it above for the `isLineMdComment`
-                                        --inDetailsLevel;
+                                        --collapsibleLevel;
 
                                         outputForLine.Append("</details>");
 
@@ -198,7 +199,7 @@ namespace CsToMd
                                     // Process the expansion of the `/*md{ foo\nbar\n}*/ into the `<details><summary>foo</summary>\nbar\n</details>`
                                     if (parserAt < lineLen && line[parserAt] == '{')
                                     {
-                                        ++inDetailsLevel;
+                                        ++collapsibleLevel;
 
                                         var summary = line.AsSpan(outputAt + 1).Trim();
                                         // The additional new line at the end is required for the proper processing of summary
@@ -269,11 +270,24 @@ namespace CsToMd
                             {
                                 scope = Scope.Code;
 
+                                var closingCollapsible = false;
+
                                 // Ignore the preceding `md` in `md*/` if they found
                                 var prevSpanLen = parserAt - outputAt;
-                                if (prevSpanLen >= 2 & parserAt >= 2 &&
-                                    (line[parserAt - 2] == 'm' & line[parserAt - 1] == 'd'))
-                                    prevSpanLen -= 2;
+                                if (prevSpanLen >= 2 & parserAt >= 2)
+                                {
+                                    if (line[parserAt - 2] == 'm' & line[parserAt - 1] == 'd')
+                                        prevSpanLen -= 2;
+
+                                    // Ignore the notmatched closing `}`
+                                    if (closingCollapsible = collapsibleLevel > 0 & parserAt >= 3 && line[parserAt - 3] == '}')
+                                        --prevSpanLen;
+                                }
+                                else if (prevSpanLen >= 1 & parserAt >= 1 & collapsibleLevel > 0)
+                                {
+                                    if (closingCollapsible = line[parserAt - 1] == '}')
+                                        --prevSpanLen;
+                                }
 
                                 ReadOnlySpan<char> spanBeforeClosingMdComment = default;
                                 if (prevSpanLen > 0)
@@ -286,6 +300,13 @@ namespace CsToMd
 
                                 parserAt += 2; // skip over the closing comment
                                 outputAt = parserAt;
+
+                                if (closingCollapsible)
+                                {
+                                    Debug.Assert(collapsibleLevel > 0, "Check was done above for the `closingCollapsible`");
+                                    --collapsibleLevel;
+                                    outputForLine.AppendLineToNonEmpty().Append("</details>");
+                                }
 
                                 // Skip over a single space after the comment, but keep multiple as it may be a User intent, e.g. for `md*/ foo` output `foo`
                                 // but only at the start of the line because otherwise it is already trimmed before the comment end, e.g. `x md*/ y` should produce `x y` but not `xy`

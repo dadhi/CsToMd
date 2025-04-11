@@ -127,7 +127,7 @@ public class IssueTests
             # Bar
             
             }*/
-            /*md{ X }*/
+            /*md{ mismatched collapsible is on you  }*/
             """.Split(Environment.NewLine)).ToString();
 
         Assert.Equal(
@@ -138,7 +138,8 @@ public class IssueTests
             # Bar
             
             </details>
-
+            <details><summary>mismatched collapsible is on you  }*/</summary>
+            
             """,
             result);
     }
