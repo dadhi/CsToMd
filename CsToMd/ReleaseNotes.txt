@@ -5,5 +5,9 @@
 - feature: #15 Directive to wrap code in Markdown code blocks
 - feature: #16 Ignore leading whitespace before md comments
 - feature: #17 Allow to close the md comment without md prefix
+- feature: #20 Support collapsible section with multiline comments
 
 - change: #18 Avoid removing md comments inside the normal comments
+- change: #21 Avoid making collapsible section summary bold via strong tag - Users may do that themselves
+
+**Full Changelog**: https://github.com/dadhi/CsToMd/compare/v2.0.1...v2.1.0
