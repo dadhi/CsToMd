@@ -1,6 +1,6 @@
 ## Docs
 
-<details><summary><strong>usings ...</strong></summary>
+<details><summary>usings ...</summary>
 
 ```cs
 namespace DryIoc.Docs;

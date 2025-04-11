@@ -123,9 +123,8 @@ namespace CsToMd
                                         ++inDetailsLevel;
 
                                         var summary = line.AsSpan(outputAt + 1).Trim();
-                                        outputForLine.Append("<details><summary><strong>").Append(summary);
-                                        // The additional new line is required here for the markdown processing of summary
-                                        outputForLine.AppendLine("</strong></summary>");
+                                        // The additional new line at the end is required for the proper processing of summary
+                                        outputForLine.Append("<details><summary>").Append(summary).AppendLine("</summary>");
 
                                         outputAt = lineLen; // the whole line is processed
                                         lineDone = true;
@@ -196,25 +195,40 @@ namespace CsToMd
                                     parserAt += 4; // skip over the opening md comment `/*md`
                                     outputAt = parserAt;
 
-                                    // Parse the code fence marker immediately after the md comment
-                                    var tail = line.AsSpan(parserAt);
-                                    var tailWoSpace = tail.TrimStart();
-                                    if (tailWoSpace.StartsWith(codeFenceLangMarker))
+                                    // Process the expansion of the `/*md{ foo\nbar\n}*/ into the `<details><summary><strong>foo</strong></summary>\nbar\n</details>`
+                                    if (parserAt < lineLen && line[parserAt] == '{')
                                     {
-                                        var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
-                                            ref shouldInsertCodeFence, ref currentCodeFenceLang);
+                                        ++inDetailsLevel;
 
-                                        // Skip the `code: lang` and stop immediatly after the lang
-                                        var spaceLen = tail.Length - tailWoSpace.Length;
-                                        parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
-                                        outputAt = parserAt;
+                                        var summary = line.AsSpan(outputAt + 1).Trim();
+                                        // The additional new line at the end is required for the proper processing of summary
+                                        outputForLine.Append("<details><summary>").Append(summary).AppendLine("</summary>");
+
+                                        outputAt = lineLen; // the whole line is processed
+                                        lineDone = true;
                                     }
-
-                                    // Skip a single leading space after the md comment, e.g. in `/*md foo` output `foo`
-                                    if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
+                                    else
                                     {
-                                        ++parserAt;
-                                        ++outputAt;
+                                        // Parse the code fence marker immediately after the md comment
+                                        var tail = line.AsSpan(parserAt);
+                                        var tailWoSpace = tail.TrimStart();
+                                        if (tailWoSpace.StartsWith(codeFenceLangMarker))
+                                        {
+                                            var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
+                                                ref shouldInsertCodeFence, ref currentCodeFenceLang);
+
+                                            // Skip the `code: lang` and stop immediatly after the lang
+                                            var spaceLen = tail.Length - tailWoSpace.Length;
+                                            parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
+                                            outputAt = parserAt;
+                                        }
+
+                                        // Skip a single leading space after the md comment, e.g. in `/*md foo` output `foo`
+                                        if (parserAt + 1 < lineLen && line[parserAt] == ' ' & line[parserAt + 1] != ' ')
+                                        {
+                                            ++parserAt;
+                                            ++outputAt;
+                                        }
                                     }
                                 }
                                 else

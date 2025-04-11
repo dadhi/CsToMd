@@ -63,25 +63,6 @@ public class IssueTests
     }
 
     [Fact]
-    public void Issue15_Simplest_test()
-    {
-        var result = CommentStripper.StripMdComments(
-            """
-            //md code:
-            var x = 42;
-            """.Split(Environment.NewLine)).ToString();
-
-        Assert.Equal(
-            """
-            ```
-            var x = 42;
-            ```
-
-            """,
-            result);
-    }
-
-    [Fact]
     public void Issue15_Automatically_wrap_code_in_code_fence_with_the_specified_lang()
     {
         var result = CommentStripper.StripMdComments(
@@ -112,6 +93,51 @@ public class IssueTests
             ```cs
             var y = 43;
             ```
+
+            """,
+            result);
+    }
+
+    [Fact]
+    public void Issue15_Simplest_test()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            //md code:
+            var x = 42;
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            ```
+            var x = 42;
+            ```
+
+            """,
+            result);
+    }
+
+    [Fact]
+    public void Issue20_collapsible_section_with_multiline_comments()
+    {
+        var result = CommentStripper.StripMdComments(
+            """
+            /*md{ Foo
+            
+            # Bar
+            
+            }*/
+            /*md{ X }*/
+            """.Split(Environment.NewLine)).ToString();
+
+        Assert.Equal(
+            """
+            <details><summary>Foo</summary>
+            
+
+            # Bar
+            
+            </details>
 
             """,
             result);
