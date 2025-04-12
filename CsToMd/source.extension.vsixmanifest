@@ -8,9 +8,10 @@
         <Description xml:space="preserve">Generates Markdown documentation file from the input C# file by removing the `/*md`, `md*/`, "//md" comments</Description>
         <MoreInfo>https://github.com/dadhi/CsToMd</MoreInfo>
         <License>LICENSE.txt</License>
+        <GettingStartedGuide>readme.html</GettingStartedGuide>
         <ReleaseNotes>ReleaseNotes.txt</ReleaseNotes>
         <!-- <Icon>RemoveMdComments.ico</Icon> -->
-        <PreviewImage>screen1.png</PreviewImage>
+        <PreviewImage>screenshot_vsix_v2_1_0.png</PreviewImage>
         <Tags>CSharp;Markdown;md;FileGenerator;TemplateGenerator;LiterateProgramming;Documentation;LiveDocumentation;RunnableSamples</Tags>
     </Metadata>
     <Installation>
@@ -32,5 +33,6 @@
     </Prerequisites>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.ExtensionManager.PreviewImage" d:Source="File" Path="screenshot_vsix_v2_1_0.png" />
     </Assets>
 </PackageManifest>

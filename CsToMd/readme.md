@@ -26,17 +26,13 @@ This extension for Visual Studio 2019+ contains the CustomTool File Generator.
 
 When applied to the C# source file it looks like this:
 
-![VS file properties](../screen1.png)
+![Screenshot](../screenshot_vsix_v2_1_0.png)
 
-
-The generated result:
-
-![VS result](../screen2.png)
 
 
 ### How to use
 
-- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the markerplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases).
+- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the markerplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases/tag/v2.1.0).
 - In properties of your .cs file set the `CustomTool` property to `CsToMd`.
 - Save the .cs file
 - Check the generated .md file under the .cs file in Solution Explorer 

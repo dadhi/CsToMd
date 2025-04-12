@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>CsToMd.md</title>
+  <style></style>
+</head>
+
+<body id="preview">
+  <h1 class="code-line" data-line-start=0 data-line-end=1><a id="CsToMd_0"></a>CsToMd</h1>
+  <ul>
+    <li class="has-line-data" data-line-start="1" data-line-end="5"><a href="#cstomd">CsToMd</a>
+      <ul>
+        <li class="has-line-data" data-line-start="2" data-line-end="3"><a href="#the-idea">The Idea</a></li>
+        <li class="has-line-data" data-line-start="3" data-line-end="5"><a href="#visual-studio-extension">Visual Studio extension</a>
+          <ul>
+            <li class="has-line-data" data-line-start="4" data-line-end="5"><a href="#how-to-use">How to use</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h2 class="code-line" data-line-start=7 data-line-end=8><a id="The_Idea_7"></a>The Idea</h2>
+  <p class="has-line-data" data-line-start="9" data-line-end="10">The idea is to have a normal C# .cs file with the special comments <code>/*md</code>, <code>md*/</code>, and <code>//md</code> which
+    will be stripped when converting the file into the respective Markdown .md file. There are couple of additional features but this is basically it.</p>
+  <p class="has-line-data" data-line-start="11" data-line-end="12">Now you have <strong>the documentation always up-to-date with the runnable samples</strong> in the normal .NET Test library project
+    with NUnit, XUnit, etc.</p>
+  <p class="has-line-data" data-line-start="13" data-line-end="14">You may check the DryIoc <a href="https://github.com/dadhi/DryIoc/tree/master/docs/DryIoc.Docs">documentation project</a> for the
+    real-world case example.</p>
+  <p class="has-line-data" data-line-start="15" data-line-end="16">The additional features:</p>
+  <ul>
+    <li class="has-line-data" data-line-start="17" data-line-end="18">Directive to automatically wrap code in code fence with the optional language, e.g. add <code>//md code:csharp</code>, or just
+      <code>//md code:</code> to add fences, and <code>//md code:--</code> to stop adding fences. The directive may be used multiple times through the file.
+    </li>
+    <li class="has-line-data" data-line-start="18" data-line-end="19">Converting the section outlined with <code>//md{</code> and <code>//md}</code> comments into the <a
+        href="https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab">collapsed markdown details</a>.</li>
+    <li class="has-line-data" data-line-start="19" data-line-end="20">The optional <code>cstomd.config</code> file in the folder with the lines starters to be removed completely from the generated
+      documentation file.</li>
+  </ul>
+  <h2 class="code-line" data-line-start=22 data-line-end=23><a id="Visual_Studio_extension_22"></a>Visual Studio extension</h2>
+  <p class="has-line-data" data-line-start="24" data-line-end="25">This extension for Visual Studio 2019+ contains the CustomTool File Generator.</p>
+  <p class="has-line-data" data-line-start="26" data-line-end="27">When applied to the C# source file it looks like this:</p>
+  <p class="has-line-data" data-line-start="28" data-line-end="29"><img src="screenshot_vsix_v2_1_0.png" alt="Screenshot" width="1024px"></p>
+  <h3 class="code-line" data-line-start=32 data-line-end=33><a id="How_to_use_32"></a>How to use</h3>
+  <ul>
+    <li class="has-line-data" data-line-start="34" data-line-end="35">Install <a href="https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123">the extension</a> directly from the
+      markerplace in Visual Studio or download the extension vsix file from the <a href="https://github.com/dadhi/CsToMd/releases/tag/v2.1.0">release page</a>.</li>
+    <li class="has-line-data" data-line-start="35" data-line-end="36">In properties of your .cs file set the <code>CustomTool</code> property to <code>CsToMd</code>.</li>
+    <li class="has-line-data" data-line-start="36" data-line-end="37">Save the .cs file</li>
+    <li class="has-line-data" data-line-start="37" data-line-end="38">Check the generated .md file under the .cs file in Solution Explorer</li>
+  </ul>
+
+</body>
+
+</html>
