@@ -10,13 +10,11 @@
 
 ## Why?
 */
-//md{<strong>See for yourself ...</strong>
-/*md
-- still a valid C# `code` file,
-    * a nice markdown documentation,
-        + and [all around awesome!](#end-of-the-document)
-md*/
-//md}
+/*md{<strong>See for yourself ...</strong>
+- Still a valid C# `code` file,
+    * A nice markdown documentation,
+        + And [all around awesome!](#end-of-the-document)
+}*/
 
 //md{ usings ...
 using System;

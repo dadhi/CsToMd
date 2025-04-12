@@ -9,9 +9,9 @@
 ## Why?
 <details><summary><strong>See for yourself ...</strong></summary>
 
-- still a valid C# `code` file,
-    * a nice markdown documentation,
-        + and [all around awesome!](#end-of-the-document)
+- Still a valid C# `code` file,
+    * A nice markdown documentation,
+        + And [all around awesome!](#end-of-the-document)
 </details>
 
 <details><summary>usings ...</summary>
