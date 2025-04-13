@@ -150,7 +150,7 @@ namespace CsToMd
                                             var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
                                                 ref shouldInsertCodeFence, ref currentCodeFenceLang);
 
-                                            // Skip the `code: lang` and stop immediatly after the lang
+                                            // Skip the `code: lang` and stop immediately after the lang
                                             var spaceLen = tail.Length - tailWoSpace.Length;
                                             parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
                                             outputAt = parserAt;
@@ -218,7 +218,7 @@ namespace CsToMd
                                             var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length),
                                                 ref shouldInsertCodeFence, ref currentCodeFenceLang);
 
-                                            // Skip the `code: lang` and stop immediatly after the lang
+                                            // Skip the `code: lang` and stop immediately after the lang
                                             var spaceLen = tail.Length - tailWoSpace.Length;
                                             parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
                                             outputAt = parserAt;
@@ -279,7 +279,7 @@ namespace CsToMd
                                     if (line[parserAt - 2] == 'm' & line[parserAt - 1] == 'd')
                                         prevSpanLen -= 2;
 
-                                    // Ignore the notmatched closing `}`
+                                    // Ignore the unmatched closing `}`
                                     if (closingCollapsible = collapsibleLevel > 0 & parserAt >= 3 && line[parserAt - 3] == '}')
                                         --prevSpanLen;
                                 }
@@ -328,7 +328,7 @@ namespace CsToMd
                                     {
                                         var langLen = ParseCodeLang(tailWoSpace.Slice(codeFenceLangMarker.Length), ref shouldInsertCodeFence, ref currentCodeFenceLang);
 
-                                        // Skip the `code: lang` and stop immediatly after the lang
+                                        // Skip the `code: lang` and stop immediately after the lang
                                         var spaceLen = tail.Length - tailWoSpace.Length;
                                         parserAt += spaceLen + codeFenceLangMarker.Length + langLen;
                                         outputAt = parserAt;
@@ -424,7 +424,7 @@ namespace CsToMd
             if (char.IsWhiteSpace(lineTail[0]))
                 return 1;
 
-            // Found stop lang dash, now comsume the remaining dashes until non-dash
+            // Found stop lang dash, now consume the remaining dashes until non-dash
             if (lineTail[0] == '-')
             {
                 var i = 1;

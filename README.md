@@ -1,11 +1,11 @@
 # CsToMd
 - [CsToMd](#cstomd)
   - [Idea and Overview](#idea-and-overview)
-  - [Visual Studio extension](#visual-studio-extension)
-    - [How to use](#how-to-use)
   - [Dotnet CLI tool](#dotnet-cli-tool)
     - [Ad-hoc document generation](#ad-hoc-document-generation)
     - [Build integration](#build-integration)
+  - [Visual Studio extension](#visual-studio-extension)
+    - [How to use](#how-to-use)
 
 
 ## Idea and Overview
@@ -14,7 +14,7 @@
 
 The [dotnet CLI tool](https://www.nuget.org/packages/dotnet-cstomd) to convert C# file with Unit Tests into the [Markdown](https://guides.github.com/features/mastering-markdown) documentation.
 
-The idea is to have a normal C# .cs file with the special comments `/*md`, `md*/`, and `//md` which will be stripped when converting the file into the respective Markdown .md file. There are couple of additional features but this is basically it. 
+The idea is to have a normal C# .cs file with the special comments `/*md`, `md*/`, and `//md` which will be stripped when converting the file into the respective Markdown .md file. There are a couple of additional features but this is basically it. 
 
 Now you have **the documentation always up-to-date with the runnable samples** in the normal .NET Test library project with NUnit, XUnit, etc.
 
@@ -25,23 +25,6 @@ The additional features:
 - Directive to automatically wrap code in code fence with the optional language, e.g. add `//md code:csharp`, or just `//md code:` to add fences, and `//md code:--` to stop adding fences. The directive may be used multiple times through the file.
 - Converting the section outlined with `//md{` and `//md}` comments into the [collapsed markdown details](https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab).
 - The optional `cstomd.config` file in the folder with the lines starters to be removed completely from the generated documentation file.
-
-
-## Visual Studio extension
-
-This extension for Visual Studio 2019+ contains the CustomTool File Generator.
-
-When applied to the C# source file it looks like this:
-
-![Screenshot](screenshot_vsix_v2_1_0.png)
-
-
-### How to use
-
-- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the markerplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases/tag/v2.1.0).
-- In properties of your .cs file set the `CustomTool` property to `CsToMd`.
-- Save the .cs file
-- Check the generated .md file under the .cs file in Solution Explorer
 
 
 ## Dotnet CLI tool
@@ -85,3 +68,19 @@ I addition the dotnet tool enables the documentation development in the **Visual
   
   Here is the [MS tutorial](https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use#:~:text=Create%20a%20manifest%20file,-To%20install%20a&text=The%20output%20indicates%20successful%20creation%20of%20the%20file.&text=The%20template%20%22Dotnet%20local%20tool%20manifest%20file%22%20was%20created%20successfully.&text=The%20tools%20listed%20in%20a,the%20one%20that%20contains%20the%20.) for installing and using the local tools.
  
+
+## Visual Studio extension
+
+This extension for Visual Studio 2019+ contains the CustomTool File Generator.
+
+When applied to the C# source file it looks like this:
+
+![Screenshot](screenshot_vsix_v2_1_0.png)
+
+
+### How to use
+
+- Install [the extension](https://marketplace.visualstudio.com/items?itemName=dadhi.cstomd123) directly from the marketplace in Visual Studio or download the extension vsix file from the [release page](https://github.com/dadhi/CsToMd/releases/tag/v2.1.0).
+- In properties of your .cs file set the `CustomTool` property to `CsToMd`.
+- Save the .cs file
+- Check the generated .md file under the .cs file in Solution Explorer
